@@ -1,0 +1,9 @@
+After pull
+
+go mod tidy
+
+then
+
+go run main.go -env=pgsql
+
+pgsql.yaml provide in our discord
