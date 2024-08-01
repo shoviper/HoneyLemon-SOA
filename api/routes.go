@@ -9,6 +9,7 @@ import (
 
 func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	clientService := services.NewClientService(db)
+	accountService := services.NewAccountService(db)
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World!")
@@ -19,7 +20,10 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 		v1 := api.Group("/v1")
 		{
 			v1.Get("/clients", clientService.GetAllClients)
-			v1.Post("/clients", clientService.RegisterClient)
+			v1.Post("/client", clientService.RegisterClient)
+
+			v1.Get("/accounts", accountService.GetAllAccounts)
+			v1.Post("/account", accountService.CreateAccount)
 		}
 	}
 }
