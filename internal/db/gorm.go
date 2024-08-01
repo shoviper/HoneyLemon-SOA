@@ -2,34 +2,34 @@ package db
 
 import (
 	"fmt"
-	"soaProject/internal/db/entities"
 	"log"
+	"soaProject/internal/db/entities"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"github.com/spf13/viper"
 	_ "github.com/lib/pq"
+	"github.com/spf13/viper"
 )
 
 type Config struct {
 	ComputeId string
-	Password string
-	DB_Name string
+	Password  string
+	DB_Name   string
 }
 
 func NewConfig(v *viper.Viper) *Config {
 	return &Config{
 		ComputeId: v.GetString("db.computeId"),
-		Password: v.GetString("db.password"),
-		DB_Name: v.GetString("db.dbName"),
+		Password:  v.GetString("db.password"),
+		DB_Name:   v.GetString("db.dbName"),
 	}
 }
 
 func (cf *Config) PostgresConnection() (*gorm.DB, error) {
-    dsn := fmt.Sprintf("postgresql://virtual_banking_db_owner:%s@%s.ap-southeast-1.aws.neon.tech/%s?sslmode=require", cf.Password, cf.ComputeId, cf.DB_Name)
-    db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-    if err != nil {
+	dsn := fmt.Sprintf("postgresql://virtual_banking_db_owner:%s@%s.ap-southeast-1.aws.neon.tech/%s?sslmode=require", cf.Password, cf.ComputeId, cf.DB_Name)
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
 		log.Fatal(err)
 		return nil, err
 	}
@@ -37,9 +37,10 @@ func (cf *Config) PostgresConnection() (*gorm.DB, error) {
 
 	cf.Migrate(db)
 
-    return db, nil
+	return db, nil
 }
 
 func (cf *Config) Migrate(db *gorm.DB) {
 	db.AutoMigrate(&entities.Client{})
+	db.AutoMigrate(&entities.Account{})
 }

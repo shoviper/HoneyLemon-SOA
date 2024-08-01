@@ -36,7 +36,7 @@ func (cs *ClientService) GetAllClients(ctx *fiber.Ctx) error {
 		})
 	}
 
-	return ctx.JSON(clientsInfo)
+	return ctx.Status(200).JSON(clientsInfo)
 }
 
 func (cs *ClientService) RegisterClient(ctx *fiber.Ctx) error {
@@ -59,5 +59,5 @@ func (cs *ClientService) RegisterClient(ctx *fiber.Ctx) error {
 		})
 	}
 
-	return ctx.JSON(newClient)
+	return ctx.Status(200).JSON(newClient)
 }
