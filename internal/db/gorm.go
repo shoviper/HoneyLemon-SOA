@@ -35,18 +35,11 @@ func (cf *Config) PostgresConnection() (*gorm.DB, error) {
 	}
 	fmt.Println("Connected to database")
 
-	if err := db.AutoMigrate(&entities.Client{}); err != nil {
-		log.Fatal(err)
-		return nil, err
-	}
+	cf.Migrate(db)
 
     return db, nil
 }
 
-func (cf *Config) Migrate() {
-	db, err := cf.PostgresConnection()
-	if err != nil {
-		log.Fatal(err)
-	}
+func (cf *Config) Migrate(db *gorm.DB) {
 	db.AutoMigrate(&entities.Client{})
 }
