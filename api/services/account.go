@@ -49,6 +49,7 @@ func (cs *AccountService) CreateAccount(ctx *fiber.Ctx) error {
 	}
 
 	newAccount := entities.Account{
+		ID:       account.ID,
 		ClientID: account.ClientID,
 		Type:     account.Type,
 		Balance:  account.Balance,

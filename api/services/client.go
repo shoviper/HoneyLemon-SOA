@@ -48,6 +48,7 @@ func (cs *ClientService) RegisterClient(ctx *fiber.Ctx) error {
 	}
 
 	newClient := entities.Client{
+		ID:        client.ID,
 		Name:      client.Name,
 		Address:   client.Address,
 		BirthDate: client.BirthDate,
