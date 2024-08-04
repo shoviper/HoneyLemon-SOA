@@ -21,12 +21,15 @@ func JWT_Setup(app *fiber.App) {
 // JWTAuth is a function to authenticate JWT token
 func JWTAuth() func(*fiber.Ctx) error {
 	return (func(c *fiber.Ctx) error {
-		accessToken := strings.TrimPrefix(c.Get("Authorization"), "Bearer ")
-		if accessToken == "" {
+		// read from cookie
+		cookie := c.Cookies("token")
+		if cookie == "" {
 			return c.Status(401).JSON(fiber.Map{
 				"message": "Unauthorized",
 			})
 		}
+
+		accessToken := strings.Replace(cookie, "Bearer ", "", 1)
 
 		token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
 			return []byte(viper.GetString("jwt.secret")), nil
