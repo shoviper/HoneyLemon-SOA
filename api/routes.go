@@ -21,13 +21,13 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 		v1 := api.Group("/v1")
 		{
 			v1.Get("/clients", clientService.GetAllClients)
-			v1.Post("/client", clientService.RegisterClient)
+			v1.Post("/clients", clientService.RegisterClient)
 
 			v1.Get("/accounts", accountService.GetAllAccounts)
-			v1.Post("/account", accountService.CreateAccount)
+			v1.Post("/accounts", accountService.CreateAccount)
 
 			v1.Get("/transactions", transactionService.GetAllTransactions)
-			v1.Post("/transaction", transactionService.CreateTransaction)
+			v1.Post("/transactions", transactionService.CreateTransaction)
 		}
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"soaProject/api"
+	"soaProject/api/services"
 	"soaProject/internal/db"
 	"soaProject/internal/config"
 
@@ -30,6 +31,8 @@ func Server(name, value, usage string) error{
 	app := fiber.New()
 
 	api.SetupRoutes(app, db)
+	authConfig := services.NewAuthConfig(configDetail)
+	authConfig.JWT_Setup(app)
 
 	serverConfig := config.NewServerConfig(configDetail)
 
