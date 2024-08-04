@@ -21,7 +21,8 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 		v1 := api.Group("/v1")
 		{
 			v1.Get("/clients", clientService.GetAllClients)
-			v1.Post("/clients", clientService.RegisterClient)
+			v1.Post("/clients/register", clientService.RegisterClient)
+			v1.Post("/clients/login", clientService.LoginClient)
 
 			v1.Get("/accounts", accountService.GetAllAccounts)
 			v1.Post("/accounts", accountService.CreateAccount)

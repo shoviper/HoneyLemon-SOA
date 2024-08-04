@@ -11,22 +11,14 @@ import (
 	viper "github.com/spf13/viper"
 )
 
-type AuthConfig struct {
-	Secret string
-}
-
-func NewAuthConfig(v *viper.Viper) *AuthConfig {
-	return &AuthConfig{
-		Secret: viper.GetString("jwt.secret"),
-	}
-}
-
-func (a *AuthConfig) JWT_Setup(app *fiber.App) {
+// JWT_Setup is a function to setup JWT middleware
+func JWT_Setup(app *fiber.App) {
 	app.Use(jwtware.New(jwtware.Config{
-		SigningKey: jwtware.SigningKey{Key: []byte(a.Secret)},
+		SigningKey: jwtware.SigningKey{Key: []byte(viper.GetString("jwt.secret"))},
 	}))
 }
 
+// JWTAuth is a function to authenticate JWT token
 func JWTAuth() func(*fiber.Ctx) error {
 	return (func(c *fiber.Ctx) error {
 		accessToken := strings.TrimPrefix(c.Get("Authorization"), "Bearer ")

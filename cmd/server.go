@@ -31,9 +31,8 @@ func Server(name, value, usage string) error{
 	app := fiber.New()
 
 	api.SetupRoutes(app, db)
-	authConfig := services.NewAuthConfig(configDetail)
-	authConfig.JWT_Setup(app)
-
+	services.JWT_Setup(app)
+	
 	serverConfig := config.NewServerConfig(configDetail)
 
 	serverAddress := fmt.Sprintf("%s:%d", serverConfig.Host, serverConfig.Port)
