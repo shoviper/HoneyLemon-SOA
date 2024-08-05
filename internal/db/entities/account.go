@@ -2,6 +2,10 @@ package entities
 
 import (
 	"time"
+    cryptoRand "crypto/rand"
+    "math/big"
+
+    "github.com/oklog/ulid/v2"
 
 	"gorm.io/gorm"
 )
@@ -23,6 +27,20 @@ func (Account) TableName() string {
 }
 
 func (c *Account) BeforeCreate(tx *gorm.DB) (err error) {
+	// Create a new ULID
+	t := time.Now().UTC()
+	entropy := ulid.Monotonic(cryptoRand.Reader, 0)
+	ulid := ulid.MustNew(ulid.Timestamp(t), entropy)
+
+	// Convert the ULID to a big.Int
+	bigInt := new(big.Int).SetBytes(ulid[:])
+
+	// Get the last 10 digits
+	modulus := new(big.Int).SetInt64(10000000000)
+	result := new(big.Int).Mod(bigInt, modulus)
+
+	// Convert the result to a string
+	c.ID = result.String()
 	c.CreatedAt = time.Now()
 	c.UpdatedAt = time.Now()
 	return

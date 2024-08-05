@@ -31,6 +31,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 				account.Use(services.JWTAuth())
 				account.Get("/", accountService.GetAllAccounts)
 				account.Post("/", accountService.CreateAccount)
+				account.Get("/:id", accountService.GetAccount)
 			}
 		}
 	}
