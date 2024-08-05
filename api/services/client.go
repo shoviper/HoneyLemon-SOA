@@ -114,7 +114,7 @@ func (cs *ClientService) LoginClient(ctx *fiber.Ctx) error {
 	}
 
 	claims := jwt.MapClaims{
-		"id": clientDB.ID,
+		"userID": clientDB.ID,
 		"exp": time.Now().Add(time.Hour * 24 * 365).Unix(),
 	}
 
