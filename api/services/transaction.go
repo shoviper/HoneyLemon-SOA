@@ -1,64 +1,118 @@
 package services
 
 import (
+	"encoding/xml"
+	"net/http"
 	"soaProject/internal/db/entities"
-	"soaProject/internal/db/models"
+	"time"
 
-	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
 
+type SOAPEnvelope struct {
+	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`
+	Body    SOAPBody `xml:"Body"`
+}
+
+type SOAPBody struct {
+	CreateTransactionRequest   CreateTransactionRequest   `xml:"CreateTransactionRequest,omitempty"`
+	CreateTransactionResponse  CreateTransactionResponse  `xml:"CreateTransactionResponse,omitempty"`
+	GetAllTransactionsResponse GetAllTransactionsResponse `xml:"GetAllTransactionsResponse,omitempty"`
+}
+
+type CreateTransactionRequest struct {
+	XMLName     xml.Name        `xml:"CreateTransactionRequest"`
+	Transaction TransactionInfo `xml:"transaction"`
+}
+
+type CreateTransactionResponse struct {
+	Transaction TransactionInfo `xml:"transaction"`
+}
+
+type GetAllTransactionsResponse struct {
+	Transactions []TransactionInfo `xml:"transactions"`
+}
+
+type TransactionInfo struct {
+	ID         string    `xml:"ID"`
+	SenderID   string    `xml:"SenderID"`
+	ReceiverID string    `xml:"ReceiverID"`
+	Amount     float64   `xml:"Amount"`
+	CreatedAt  time.Time `xml:"CreatedAt"`
+}
+
 type TransactionService struct {
-	transactionDB *gorm.DB
+	DB *gorm.DB
 }
 
 func NewTransactionService(db *gorm.DB) *TransactionService {
-	return &TransactionService{transactionDB: db}
+	return &TransactionService{DB: db}
 }
 
-func (cs *TransactionService) GetAllTransactions(ctx *fiber.Ctx) error {
+func (ts *TransactionService) GetAllTransactions(w http.ResponseWriter, r *http.Request) {
 	var transactions []entities.Transaction
-
-	if err := cs.transactionDB.Find(&transactions).Error; err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-
+	if err := ts.DB.Find(&transactions).Error; err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
-	var transactionInfo []models.TransactionInfo
+	var transactionInfos []TransactionInfo
 	for _, transaction := range transactions {
-		transactionInfo = append(transactionInfo, models.TransactionInfo{
+		transactionInfos = append(transactionInfos, TransactionInfo{
 			ID:         transaction.ID,
 			SenderID:   transaction.SenderID,
 			ReceiverID: transaction.ReceiverID,
 			Amount:     transaction.Amount,
+			CreatedAt:  transaction.CreatedAt,
 		})
 	}
 
-	return ctx.Status(200).JSON(transactionInfo)
+	response := SOAPEnvelope{
+		Body: SOAPBody{
+			GetAllTransactionsResponse: GetAllTransactionsResponse{
+				Transactions: transactionInfos,
+			},
+		},
+	}
+
+	w.Header().Set("Content-Type", "application/xml")
+	xml.NewEncoder(w).Encode(response)
 }
 
-func (cs *TransactionService) CreateTransaction(ctx *fiber.Ctx) error {
-	var transaction models.TransactionInfo
-	if err := ctx.BodyParser(&transaction); err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+func (ts *TransactionService) CreateTransaction(w http.ResponseWriter, r *http.Request) {
+	var envelope SOAPEnvelope
+	if err := xml.NewDecoder(r.Body).Decode(&envelope); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
+	// Extract the transaction request from the SOAP envelope
+	req := envelope.Body.CreateTransactionRequest
+
+	// Map the parsed data to your database model
 	newTransaction := entities.Transaction{
-		ID:         transaction.ID,
-		SenderID:   transaction.SenderID,
-		ReceiverID: transaction.ReceiverID,
-		Amount:     transaction.Amount,
+		ID:         req.Transaction.ID,
+		SenderID:   req.Transaction.SenderID,
+		ReceiverID: req.Transaction.ReceiverID,
+		Amount:     req.Transaction.Amount,
+		CreatedAt:  time.Now(),
 	}
 
-	if err := cs.transactionDB.Create(&newTransaction).Error; err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+	// Save to database
+	if err := ts.DB.Create(&newTransaction).Error; err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
-	return ctx.Status(200).JSON(newTransaction)
+	// Respond with success
+	response := SOAPEnvelope{
+		Body: SOAPBody{
+			CreateTransactionResponse: CreateTransactionResponse{
+				Transaction: req.Transaction,
+			},
+		},
+	}
+
+	w.Header().Set("Content-Type", "application/xml")
+	xml.NewEncoder(w).Encode(response)
 }
