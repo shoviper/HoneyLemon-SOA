@@ -74,6 +74,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	clientService := services.NewClientService(db)
 	accountService := services.NewAccountService(db)
 	transactionService := services.NewTransactionService(db)
+	paymentService := services.NewPaymentService(db)
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World!")
@@ -100,8 +101,13 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 			}
 			transaction := v1.Group("/transactions")
 			{
-				transaction.Get("/", WrapHandler(transactionService.GetAllTransactions))
-				transaction.Post("/", WrapHandler(transactionService.CreateTransaction))
+				transaction.Post("/getAll", WrapHandler(transactionService.GetAllTransactions))
+				transaction.Post("/create", WrapHandler(transactionService.CreateTransaction))
+			}
+			payment := v1.Group("/payments")
+			{
+				payment.Post("/getAll", WrapHandler(paymentService.GetAllPayments))
+				payment.Post("/create", WrapHandler(paymentService.CreatePayment))
 			}
 		}
 	}

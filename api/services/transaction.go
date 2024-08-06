@@ -9,17 +9,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type SOAPEnvelope struct {
-	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`
-	Body    SOAPBody `xml:"Body"`
-}
-
-type SOAPBody struct {
-	CreateTransactionRequest   CreateTransactionRequest   `xml:"CreateTransactionRequest,omitempty"`
-	CreateTransactionResponse  CreateTransactionResponse  `xml:"CreateTransactionResponse,omitempty"`
-	GetAllTransactionsResponse GetAllTransactionsResponse `xml:"GetAllTransactionsResponse,omitempty"`
-}
-
 type CreateTransactionRequest struct {
 	XMLName     xml.Name        `xml:"CreateTransactionRequest"`
 	Transaction TransactionInfo `xml:"transaction"`
@@ -69,7 +58,7 @@ func (ts *TransactionService) GetAllTransactions(w http.ResponseWriter, r *http.
 
 	response := SOAPEnvelope{
 		Body: SOAPBody{
-			GetAllTransactionsResponse: GetAllTransactionsResponse{
+			GetAllTransactionsResponse: &GetAllTransactionsResponse{
 				Transactions: transactionInfos,
 			},
 		},
@@ -107,7 +96,7 @@ func (ts *TransactionService) CreateTransaction(w http.ResponseWriter, r *http.R
 	// Respond with success
 	response := SOAPEnvelope{
 		Body: SOAPBody{
-			CreateTransactionResponse: CreateTransactionResponse{
+			CreateTransactionResponse: &CreateTransactionResponse{
 				Transaction: req.Transaction,
 			},
 		},
