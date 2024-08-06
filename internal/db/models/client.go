@@ -19,3 +19,7 @@ type LoginClient struct {
 	ID       string `json:"id"`
 	Password string `json:"password"`
 }
+
+type DeleteClient struct {
+	ID string `json:"id"`
+}

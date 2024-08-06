@@ -131,3 +131,44 @@ func (cs *ClientService) LoginClient(ctx *fiber.Ctx) error {
 		"token": tokenString,
 	})
 }
+
+func (cs *ClientService) DeleteClient(ctx *fiber.Ctx) error {
+	var client models.DeleteClient
+	if err := ctx.BodyParser(&client); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+			"message": "Invalid request body",
+		})
+	}
+
+	var clientDB entities.Client
+	if err := cs.clientDB.Where("id = ?", client.ID).First(&clientDB).Error; err != nil {
+		return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": err.Error(),
+			"message": "Client not found",
+		})
+	}
+
+	var accountDB[] entities.Account
+	if err := cs.clientDB.Where("client_id = ?", client.ID).Find(&accountDB).Error; err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	if err := cs.clientDB.Delete(&clientDB).Error; err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	if err := cs.clientDB.Delete(&accountDB).Error; err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return ctx.Status(200).JSON(fiber.Map{
+		"message": "Client deleted successfully",
+	})
+}

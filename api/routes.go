@@ -20,15 +20,25 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	{
 		v1 := api.Group("/v1")
 		{
-			v1.Get("/clients", clientService.GetAllClients)
-			v1.Post("/clients/register", clientService.RegisterClient)
-			v1.Post("/clients/login", clientService.LoginClient)
-
-			v1.Get("/accounts", accountService.GetAllAccounts)
-			v1.Post("/accounts", accountService.CreateAccount)
-
-			v1.Get("/transactions", transactionService.GetAllTransactions)
-			v1.Post("/transactions", transactionService.CreateTransaction)
+			client := v1.Group("/clients")
+			{
+				client.Get("/", clientService.GetAllClients)
+				client.Post("/register", clientService.RegisterClient)
+				client.Post("/login", clientService.LoginClient)
+				client.Delete("/", clientService.DeleteClient)
+			}
+			account := v1.Group("/accounts")
+			{
+				account.Use(services.JWTAuth())
+				account.Get("/", accountService.GetAllAccounts)
+				account.Post("/", accountService.CreateAccount)
+				account.Get("/:id", accountService.GetAccount)
+			}
+			transaction := v1.Group("/transactions")
+			{
+				transaction.Get("/", WrapHandler(transactionService.GetAllTransactions))
+				transaction.Post("/", WrapHandler(transactionService.CreateTransaction))
+			}
 		}
 	}
 }
