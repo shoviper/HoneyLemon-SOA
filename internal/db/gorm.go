@@ -44,4 +44,5 @@ func (cf *Config) Migrate(db *gorm.DB) {
 	db.AutoMigrate(&entities.Client{})
 	db.AutoMigrate(&entities.Account{})
 	db.AutoMigrate(&entities.Transaction{})
+	db.AutoMigrate(&entities.Payment{})
 }

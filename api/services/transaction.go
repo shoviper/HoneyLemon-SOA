@@ -9,17 +9,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type SOAPEnvelope struct {
-	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`
-	Body    SOAPBody `xml:"Body"`
-}
-
-type SOAPBody struct {
-	CreateTransactionRequest   CreateTransactionRequest   `xml:"CreateTransactionRequest,omitempty"`
-	CreateTransactionResponse  CreateTransactionResponse  `xml:"CreateTransactionResponse,omitempty"`
-	GetAllTransactionsResponse GetAllTransactionsResponse `xml:"GetAllTransactionsResponse,omitempty"`
-}
-
 type CreateTransactionRequest struct {
 	XMLName     xml.Name        `xml:"CreateTransactionRequest"`
 	Transaction TransactionInfo `xml:"transaction"`
