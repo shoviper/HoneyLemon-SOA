@@ -2,7 +2,7 @@ package traffic
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -19,7 +19,7 @@ func CheckRegisterClient(ctx *fiber.Ctx) error {
 	defer resp.Body.Close()
 
 	// Read the response body from the second service
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to read response from second service")
 	}
