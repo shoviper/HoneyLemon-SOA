@@ -114,7 +114,7 @@ func (cs *ClientService) LoginClient(ctx *fiber.Ctx) error {
 	}
 
 	claims := jwt.MapClaims{
-		"id": clientDB.ID,
+		"userID": clientDB.ID,
 		"exp": time.Now().Add(time.Hour * 24 * 365).Unix(),
 	}
 
@@ -125,6 +125,13 @@ func (cs *ClientService) LoginClient(ctx *fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
+
+	//put token in cookie
+	ctx.Cookie(&fiber.Cookie{
+		Name: "token",
+		Value: tokenString,
+		Expires: time.Now().Add(time.Hour * 24 * 365),
+	})
 
 	return ctx.Status(200).JSON(fiber.Map{
 
