@@ -88,6 +88,8 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 				client.Get("/", clientService.GetAllClients)
 				client.Post("/register", clientService.RegisterClient)
 				client.Post("/login", clientService.LoginClient)
+				client.Delete("/", clientService.DeleteClient)
+
 			}
 			account := v1.Group("/accounts")
 			{
