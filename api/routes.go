@@ -102,6 +102,8 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 			transaction := v1.Group("/transactions")
 			{
 				transaction.Post("/getAll", WrapHandler(transactionService.GetAllTransactions))
+				transaction.Post("/getByID", WrapHandler(transactionService.GetTransactionByID))
+				transaction.Post("/getByAccountID", WrapHandler(transactionService.GetTransactionsByAccountID))
 				transaction.Post("/create", WrapHandler(transactionService.CreateTransaction))
 			}
 			payment := v1.Group("/payments")
