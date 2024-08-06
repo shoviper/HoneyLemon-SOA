@@ -2,14 +2,38 @@ package traffic
 
 import (
 	"bytes"
+	"encoding/json"
 	"io"
 	"net/http"
+
+	"soaProject/internal/db/models"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 func CheckRegisterClient(ctx *fiber.Ctx) error {
 	requestBody := ctx.Body()
+
+	//check if the request body is empty
+	if len(requestBody) == 0 {
+		return ctx.Status(fiber.StatusBadRequest).SendString("Request body is empty")
+	}
+
+	//check if the request body is valid JSON
+	if !json.Valid(requestBody) {
+		return ctx.Status(fiber.StatusBadRequest).SendString("Request body is not valid JSON")
+	}
+
+	//check input fields
+	var client models.RegisterClient
+	err := json.Unmarshal(requestBody, &client)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).SendString("Failed to unmarshal request body")
+	}
+
+	if client.Name == "" || client.Address == "" || client.BirthDate == "" || client.Password == "" {
+		return ctx.Status(fiber.StatusBadRequest).SendString("Missing required fields")
+	}
 
 	// Make the request to the second service
 	resp, err := http.Post("http://localhost:3000/api/v1/clients/register", "application/json", bytes.NewBuffer(requestBody))
