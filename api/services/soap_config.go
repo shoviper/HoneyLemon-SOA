@@ -10,11 +10,11 @@ type SOAPEnvelope struct {
 }
 
 type SOAPBody struct {
-	CreateTransactionRequest   CreateTransactionRequest   `xml:"CreateTransactionRequest,omitempty"`
-	CreateTransactionResponse  CreateTransactionResponse  `xml:"CreateTransactionResponse,omitempty"`
-	GetAllTransactionsResponse GetAllTransactionsResponse `xml:"GetAllTransactionsResponse,omitempty"`
+	CreateTransactionRequest   *CreateTransactionRequest   `xml:"CreateTransactionRequest,omitempty"`
+	CreateTransactionResponse  *CreateTransactionResponse  `xml:"CreateTransactionResponse,omitempty"`
+	GetAllTransactionsResponse *GetAllTransactionsResponse `xml:"GetAllTransactionsResponse,omitempty"`
 
-	CreatePaymentRequest   CreatePaymentRequest   `xml:"CreatePaymentRequest,omitempty"`
-	CreatePaymentResponse  CreatePaymentResponse  `xml:"CreatePaymentResponse,omitempty"`
-	GetAllPaymentsResponse GetAllPaymentsResponse `xml:"GetAllPaymentsResponse,omitempty"`
+	CreatePaymentRequest   *CreatePaymentRequest   `xml:"CreatePaymentRequest,omitempty"`
+	CreatePaymentResponse  *CreatePaymentResponse  `xml:"CreatePaymentResponse,omitempty"`
+	GetAllPaymentsResponse *GetAllPaymentsResponse `xml:"GetAllPaymentsResponse,omitempty"`
 }

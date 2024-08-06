@@ -58,7 +58,7 @@ func (ts *PaymentService) GetAllPayments(w http.ResponseWriter, r *http.Request)
 
 	response := SOAPEnvelope{
 		Body: SOAPBody{
-			GetAllPaymentsResponse: GetAllPaymentsResponse{
+			GetAllPaymentsResponse: &GetAllPaymentsResponse{
 				Payments: paymentInfos,
 			},
 		},
@@ -96,7 +96,7 @@ func (ts *PaymentService) CreatePayment(w http.ResponseWriter, r *http.Request) 
 	// Respond with success
 	response := SOAPEnvelope{
 		Body: SOAPBody{
-			CreatePaymentResponse: CreatePaymentResponse{
+			CreatePaymentResponse: &CreatePaymentResponse{
 				Payment: req.Payment,
 			},
 		},

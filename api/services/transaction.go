@@ -58,7 +58,7 @@ func (ts *TransactionService) GetAllTransactions(w http.ResponseWriter, r *http.
 
 	response := SOAPEnvelope{
 		Body: SOAPBody{
-			GetAllTransactionsResponse: GetAllTransactionsResponse{
+			GetAllTransactionsResponse: &GetAllTransactionsResponse{
 				Transactions: transactionInfos,
 			},
 		},
@@ -96,7 +96,7 @@ func (ts *TransactionService) CreateTransaction(w http.ResponseWriter, r *http.R
 	// Respond with success
 	response := SOAPEnvelope{
 		Body: SOAPBody{
-			CreateTransactionResponse: CreateTransactionResponse{
+			CreateTransactionResponse: &CreateTransactionResponse{
 				Transaction: req.Transaction,
 			},
 		},
