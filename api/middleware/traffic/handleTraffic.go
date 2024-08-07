@@ -3,7 +3,6 @@ package traffic
 import (
 	"bytes"
 	"encoding/json"
-	"encoding/xml"
 	"fmt"
 	"io"
 	"net/http"
@@ -58,22 +57,18 @@ func CheckRegisterClient(ctx *fiber.Ctx) error {
 }
 
 func GetAllTransactions(ctx *fiber.Ctx) error {
-	envelope := SOAPEnvelope{
-		XmlnsSoap: "http://schemas.xmlsoap.org/soap/envelope/",
-		XmlnsTns:  "http://soaProject/TransactionService",
-		Header:    SOAPHeader{},
-		Body:      SOAPBody{GetAllTransactionsRequest: &GetAllTransactionsRequest{}},
-	}
-
-	// Marshal the envelope to XML
-	requestBody, err := xml.MarshalIndent(envelope, "", "   ")
-	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).SendString("Error marshalling XML: " + err.Error())
-	}
+	// Create the request body for the SOAP request
+	requestBody := fmt.Sprintf(`
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://soaProject/TransactionService">
+   		<soapenv:Header/>
+   		<soapenv:Body>
+      		<tns:GetAllTransactionsRequest/>
+   		</soapenv:Body>
+	</soapenv:Envelope>`)
 
 	// Send the XML request to the specified endpoint
 	url := "http://localhost:3000/api/v1/transactions/getAll"
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBody))
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(requestBody)))
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Error creating request: " + err.Error())
 	}
@@ -291,6 +286,244 @@ func CreateTransaction(ctx *fiber.Ctx) error {
 
 	// Extract the Body part and replace "content"
 	bodyJson, err := ExtractBody(jsonResponse, "CreateTransactionResponse")
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Error extracting Body from JSON: " + err.Error())
+	}
+
+	// Return the response back to the client
+	return ctx.Status(resp.StatusCode).SendString(string(bodyJson))
+}
+
+func GetAllPayments(ctx *fiber.Ctx) error {
+	// Create the request body for the SOAP request
+	requestBody := fmt.Sprintf(`
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://soaProject/TransactionService">
+		<soapenv:Header/>
+		<soapenv:Body>
+			<tns:GetAllPaymentRequest/>
+		</soapenv:Body>
+	</soapenv:Envelope>`)
+
+	// Send the XML request to the specified endpoint
+	url := "http://localhost:3000/api/v1/payments/getAll"
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(requestBody)))
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Error creating request: " + err.Error())
+	}
+	req.Header.Set("Content-Type", "application/xml")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Error sending request: " + err.Error())
+	}
+	defer resp.Body.Close()
+
+	// Read the response
+	responseBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Error reading response: " + err.Error())
+	}
+
+	// Convert XML response to JSON
+	jsonResponse, err := ConvertXMLToJSON(responseBody)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Error converting XML to JSON: " + err.Error())
+	}
+
+	// Extract the Body part and replace "content"
+	bodyJson, err := ExtractBody(jsonResponse, "GetAllPaymentsResponse")
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Error extracting Body from JSON: " + err.Error())
+	}
+
+	// Return the response back to the client
+	return ctx.Status(resp.StatusCode).SendString(string(bodyJson))
+}
+
+func GetPaymentByID(ctx *fiber.Ctx) error {
+	// Extract query parameter
+	paymentID := ctx.Query("paymentID")
+	if paymentID == "" {
+		return ctx.Status(fiber.StatusBadRequest).SendString("paymentID is required")
+	}
+
+	// Create the request body for the SOAP request
+	requestBody := fmt.Sprintf(`
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://soaProject/TransactionService">
+        <soapenv:Header/>
+        <soapenv:Body>
+            <tns:GetPaymentByIDRequest>
+                <tns:PaymentID>%s</tns:PaymentID>
+            </tns:GetPaymentByIDRequest>
+        </soapenv:Body>
+    </soapenv:Envelope>`, paymentID)
+
+	// Send the XML request to the specified endpoint
+	url := "http://localhost:3000/api/v1/payments/getByID"
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(requestBody)))
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Error creating request: " + err.Error())
+	}
+	req.Header.Set("Content-Type", "application/xml")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Error sending request: " + err.Error())
+	}
+	defer resp.Body.Close()
+
+	// Read the response
+	responseBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Error reading response: " + err.Error())
+	}
+
+	// Convert XML response to JSON
+	jsonResponse, err := ConvertXMLToJSON(responseBody)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Error converting XML to JSON: " + err.Error())
+	}
+
+	// Extract the Body part and replace "content"
+	bodyJson, err := ExtractBody(jsonResponse, "GetPaymentByIDResponse")
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Error extracting Body from JSON: " + err.Error())
+	}
+
+	// Return the response back to the client
+	return ctx.Status(resp.StatusCode).SendString(string(bodyJson))
+}
+
+func GetPaymentsByAccountID(ctx *fiber.Ctx) error {
+	// Extract query parameter
+	accountID := ctx.Query("accountID")
+	if accountID == "" {
+		return ctx.Status(fiber.StatusBadRequest).SendString("accountID is required")
+	}
+
+	// Create the request body for the SOAP request
+	requestBody := fmt.Sprintf(`
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://soaProject/TransactionService">
+        <soapenv:Header/>
+        <soapenv:Body>
+            <tns:GetPaymentsByAccountIDRequest>
+                <tns:AccountID>%s</tns:AccountID>
+            </tns:GetPaymentsByAccountIDRequest>
+        </soapenv:Body>
+    </soapenv:Envelope>`, accountID)
+
+	// Send the XML request to the specified endpoint
+	url := "http://localhost:3000/api/v1/payments/getByAccountID"
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(requestBody)))
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Error creating request: " + err.Error())
+	}
+	req.Header.Set("Content-Type", "application/xml")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Error sending request: " + err.Error())
+	}
+	defer resp.Body.Close()
+
+	// Read the response
+	responseBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Error reading response: " + err.Error())
+	}
+
+	// Convert XML response to JSON
+	jsonResponse, err := ConvertXMLToJSON(responseBody)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Error converting XML to JSON: " + err.Error())
+	}
+
+	// Extract the Body part and replace "content"
+	bodyJson, err := ExtractBody(jsonResponse, "GetPaymentsByAccountIDResponse")
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Error extracting Body from JSON: " + err.Error())
+	}
+
+	// Return the response back to the client
+	return ctx.Status(resp.StatusCode).SendString(string(bodyJson))
+}
+
+func CreatePayment(ctx *fiber.Ctx) error {
+	// Read the raw JSON body
+	rawBody := ctx.Body()
+
+	// Parse the JSON body
+	var requestBody map[string]interface{}
+	if err := json.Unmarshal(rawBody, &requestBody); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).SendString("Error parsing request body: " + err.Error())
+	}
+
+	// Extract values from the parsed JSON
+	paymentID, ok := requestBody["paymentID"].(string)
+	if !ok {
+		return ctx.Status(fiber.StatusBadRequest).SendString("Missing or invalid transactionID")
+	}
+	accountID, ok := requestBody["accountID"].(string)
+	if !ok {
+		return ctx.Status(fiber.StatusBadRequest).SendString("Missing or invalid senderID")
+	}
+	refCode, ok := requestBody["refCode"].(string)
+	if !ok {
+		return ctx.Status(fiber.StatusBadRequest).SendString("Missing or invalid receiverID")
+	}
+	amount, ok := requestBody["amount"].(float64) // JSON numbers are parsed as float64
+	if !ok {
+		return ctx.Status(fiber.StatusBadRequest).SendString("Missing or invalid amount")
+	}
+
+	// Create the request body for the SOAP request
+	requestBodyXML := fmt.Sprintf(`
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://soaProject/TransactionService">
+        <soapenv:Header/>
+        <soapenv:Body>
+            <tns:CreatePaymentRequest>
+				<tns:payment>
+					<tns:ID>%s</tns:ID>
+					<tns:AccountID>%s</tns:AccountID>
+					<tns:RefCode>%s</tns:RefCode>
+					<tns:Amount>%f</tns:Amount>
+				</tns:payment>
+            </tns:CreatePaymentRequest>
+        </soapenv:Body>
+    </soapenv:Envelope>`, paymentID, accountID, refCode, amount)
+
+	// Send the XML request to the specified endpoint
+	url := "http://localhost:3000/api/v1/payments/create"
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(requestBodyXML)))
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Error creating request: " + err.Error())
+	}
+	req.Header.Set("Content-Type", "application/xml")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Error sending request: " + err.Error())
+	}
+	defer resp.Body.Close()
+
+	// Read the response
+	responseBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Error reading response: " + err.Error())
+	}
+
+	// Convert XML response to JSON
+	jsonResponse, err := ConvertXMLToJSON(responseBody)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Error converting XML to JSON: " + err.Error())
+	}
+
+	// Extract the Body part and replace "content"
+	bodyJson, err := ExtractBody(jsonResponse, "CreatePaymentResponse")
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Error extracting Body from JSON: " + err.Error())
 	}
