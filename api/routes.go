@@ -104,13 +104,15 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, vp *viper.Viper) {
 			}
 			transaction := v1.Group("/transactions")
 			{
-				transaction.Post("/getAll", WrapHandler(transactionService.GetAllTransactions))
-				transaction.Post("/create", WrapHandler(transactionService.CreateTransaction))
+				transaction.Post("/getAll", services.WrapHandler(transactionService.GetAllTransactions))
+				transaction.Post("/getByID", services.WrapHandler(transactionService.GetTransactionByID))
+				transaction.Post("/getByAccountID", services.WrapHandler(transactionService.GetTransactionsByAccountID))
+				transaction.Post("/create", services.WrapHandler(transactionService.CreateTransaction))
 			}
 			payment := v1.Group("/payments")
 			{
-				payment.Post("/getAll", WrapHandler(paymentService.GetAllPayments))
-				payment.Post("/create", WrapHandler(paymentService.CreatePayment))
+				payment.Post("/getAll", services.WrapHandler(paymentService.GetAllPayments))
+				payment.Post("/create", services.WrapHandler(paymentService.CreatePayment))
 			}
 		}
 	}
