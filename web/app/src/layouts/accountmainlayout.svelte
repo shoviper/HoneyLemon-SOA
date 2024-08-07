@@ -38,11 +38,6 @@
               </Link>
             </DropdownItem>
             <DropdownItem class="bg-white hover:bg-slate-50 px-4 py-2 text-gray-700">
-              <Link to="/changepassword" class="w-full text-left block text-gray-700 dark:text-gray-400 hover:bg-slate-50">
-                  Change password
-              </Link>
-            </DropdownItem>
-            <DropdownItem class="bg-white hover:bg-slate-50 px-4 py-2 text-gray-700">
               <Link to="/changepin" class="w-full text-left block text-gray-700 dark:text-gray-400 hover:bg-slate-50">
                   Change pin
               </Link>
@@ -53,7 +48,7 @@
                   Sign out
               </div>
             </DropdownItem>
-            <Modal bind:open={popupModal} size="xs" autoclose>
+            <Modal bind:open={popupModal} size="xs" autoclose noCloseButton>
             <div class="text-center">
                 <ExclamationCircleOutline class="mx-auto mb-4 text-gray-400 w-12 h-12" />
                 <h3 class="mb-5 text-lg font-normal text-gray-500">Are you sure you want to sign out?</h3>

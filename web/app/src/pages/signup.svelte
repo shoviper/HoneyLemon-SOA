@@ -15,6 +15,22 @@
       <Input type="text" name="idcard" placeholder="13-Digit" required />
     </Label>
     <Label class="space-y-2">
+      <span class="text-gray-400">Full Name</span>
+      <Input type="text" name="fullname" placeholder="John Doe" required />
+    </Label>
+    <Label class="space-y-2">
+      <span class="text-gray-400">Birthdate</span>
+      <Input type="date" name="birthdate" placeholder="yyyy-mm-dd" required />
+    </Label>
+    <Label class="space-y-2">
+      <span class="text-gray-400">Address</span>
+      <Input type="text" name="address" placeholder="Address" required />
+    </Label>
+    <Label class="space-y-2">
+      <span class="text-gray-400">Email</span>
+      <Input type="email" name="email" placeholder="name@company.com" required />
+    </Label>
+    <Label class="space-y-2">
       <span class="text-gray-400">Password</span>
       <Input type="password" name="password" placeholder="••••••••" required />
     </Label>

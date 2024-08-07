@@ -10,8 +10,8 @@
       <img src="{HoneyLemonLogo}" class="h-18 w-28" alt="HoneyLemonLogo" />
     </div>
     <Label class="space-y-2">
-      <span class="text-gray-400">Enter an old 6 digit pin</span>
-      <Input type="password" name="pin" placeholder="xxxxxx" required />
+      <span class="text-gray-400">Enter a password</span>
+      <Input type="password" name="password" placeholder="xxxxxx" required />
     </Label>
     <Label class="space-y-2">
       <span class="text-gray-400">Set a new 6 digit pin</span>

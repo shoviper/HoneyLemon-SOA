@@ -21,6 +21,8 @@
     import Payment3 from "./pages/payment3.svelte";
     import Loan from "./pages/loan.svelte";
     import Investment from "./pages/invest.svelte";
+    import InvestmentBuy from "./pages/investmentbuy.svelte";
+    import InvestmentSell from "./pages/investmentsell.svelte";
     import Statement from "./pages/statement.svelte";
 
     import MainLayout from "./layouts/mainlayout.svelte";
@@ -158,6 +160,20 @@
         <Account_Settings_MainLayout>
             <AccountLayout>
                 <Investment />
+            </AccountLayout>
+        </Account_Settings_MainLayout>
+    </Route>
+    <Route path="/investmentbuy">
+        <Account_Settings_MainLayout>
+            <AccountLayout>
+                <InvestmentBuy />
+            </AccountLayout>
+        </Account_Settings_MainLayout>
+    </Route>
+    <Route path="/investmentsell">
+        <Account_Settings_MainLayout>
+            <AccountLayout>
+                <InvestmentSell />
             </AccountLayout>
         </Account_Settings_MainLayout>
     </Route>
