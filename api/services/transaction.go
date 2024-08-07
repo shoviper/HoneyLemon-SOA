@@ -196,6 +196,12 @@ func (ts *TransactionService) CreateTransaction(w http.ResponseWriter, r *http.R
 		return
 	}
 
+	if sender.ID == receiver.ID {
+		tx.Rollback()
+		http.Error(w, "Sender account and receiver account are the same", http.StatusBadRequest)
+		return
+	}
+
 	// Check if the sender has sufficient balance
 	if sender.Balance < req.Transaction.Amount {
 		tx.Rollback()
