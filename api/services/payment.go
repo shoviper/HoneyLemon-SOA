@@ -22,6 +22,24 @@ type GetAllPaymentsResponse struct {
 	Payments []PaymentInfo `xml:"payments"`
 }
 
+type GetPaymentByIDRequest struct {
+	XMLName   xml.Name `xml:"GetPaymentByIDRequest"`
+	PaymentID string   `xml:"PaymentID"`
+}
+
+type GetPaymentByIDResponse struct {
+	Payments PaymentInfo `xml:"payment"`
+}
+
+type GetPaymentsByAccountIDRequest struct {
+	XMLName   xml.Name `xml:"GetPaymentsByAccountIDRequest"`
+	AccountID string   `xml:"AccountID"`
+}
+
+type GetPaymentsByAccountIDResponse struct {
+	Payments []PaymentInfo `xml:"payment"`
+}
+
 type PaymentInfo struct {
 	ID        string    `xml:"ID"`
 	AccountID string    `xml:"AccountID"`
@@ -38,9 +56,9 @@ func NewPaymentService(db *gorm.DB) *PaymentService {
 	return &PaymentService{DB: db}
 }
 
-func (ts *PaymentService) GetAllPayments(w http.ResponseWriter, r *http.Request) {
+func (ps *PaymentService) GetAllPayments(w http.ResponseWriter, r *http.Request) {
 	var payments []entities.Payment
-	if err := ts.DB.Find(&payments).Error; err != nil {
+	if err := ps.DB.Find(&payments).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -68,7 +86,86 @@ func (ts *PaymentService) GetAllPayments(w http.ResponseWriter, r *http.Request)
 	xml.NewEncoder(w).Encode(response)
 }
 
-func (ts *PaymentService) CreatePayment(w http.ResponseWriter, r *http.Request) {
+func (ps *PaymentService) GetPaymentByID(w http.ResponseWriter, r *http.Request) {
+	var envelope SOAPEnvelope
+	if err := xml.NewDecoder(r.Body).Decode(&envelope); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Extract the payment request from the SOAP envelope
+	req := envelope.Body.GetPaymentByIDRequest
+	if req == nil {
+		http.Error(w, "Invalid request: missing GetPaymentByIDRequest", http.StatusBadRequest)
+		return
+	}
+
+	var payment entities.Payment
+	if err := ps.DB.Where("id = ?", req.PaymentID).Find(&payment).Error; err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var paymentInfo = PaymentInfo{
+		ID:        payment.ID,
+		AccountID: payment.AccountID,
+		RefCode:   payment.RefCode,
+		Amount:    payment.Amount,
+		CreatedAt: payment.CreatedAt,
+	}
+
+	response := SOAPEnvelope{
+		Body: SOAPBody{
+			GetPaymentByIDResponse: &GetPaymentByIDResponse{
+				Payments: paymentInfo,
+			},
+		},
+	}
+
+	w.Header().Set("Content-Type", "application/xml")
+	xml.NewEncoder(w).Encode(response)
+}
+
+func (ps *PaymentService) GetPaymentsByAccountID(w http.ResponseWriter, r *http.Request) {
+	var envelope SOAPEnvelope
+	if err := xml.NewDecoder(r.Body).Decode(&envelope); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Extract the payment request from the SOAP envelope
+	req := envelope.Body.GetPaymentsByAccountIDRequest
+
+	var payment []entities.Payment
+	if err := ps.DB.Where("account_id = ?", req.AccountID).Find(&payment).Error; err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var paymentInfos []PaymentInfo
+	for _, payment := range payment {
+		paymentInfos = append(paymentInfos, PaymentInfo{
+			ID:        payment.ID,
+			AccountID: payment.AccountID,
+			RefCode:   payment.RefCode,
+			Amount:    payment.Amount,
+			CreatedAt: payment.CreatedAt,
+		})
+	}
+
+	response := SOAPEnvelope{
+		Body: SOAPBody{
+			GetPaymentsByAccountIDResponse: &GetPaymentsByAccountIDResponse{
+				Payments: paymentInfos,
+			},
+		},
+	}
+
+	w.Header().Set("Content-Type", "application/xml")
+	xml.NewEncoder(w).Encode(response)
+}
+
+func (ps *PaymentService) CreatePayment(w http.ResponseWriter, r *http.Request) {
 	var envelope SOAPEnvelope
 	if err := xml.NewDecoder(r.Body).Decode(&envelope); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -78,8 +175,36 @@ func (ts *PaymentService) CreatePayment(w http.ResponseWriter, r *http.Request) 
 	// Extract the payment request from the SOAP envelope
 	req := envelope.Body.CreatePaymentRequest
 
+	// Start a database payment
+	tx := ps.DB.Begin()
+
+	// Retrieve account and receiver accounts
+	var account entities.Account
+	if err := tx.Where("id = ?", req.Payment.AccountID).First(&account).Error; err != nil {
+		tx.Rollback()
+		http.Error(w, "Account not found", http.StatusBadRequest)
+		return
+	}
+
+	// Check if the account has sufficient balance
+	if account.Balance < req.Payment.Amount {
+		tx.Rollback()
+		http.Error(w, "Insufficient balance", http.StatusBadRequest)
+		return
+	}
+
+	// Update the account's and receiver's balances
+	account.Balance -= req.Payment.Amount
+
+	// Save the updated accounts back to the database
+	if err := tx.Save(&account).Error; err != nil {
+		tx.Rollback()
+		http.Error(w, "Failed to update account's balance", http.StatusInternalServerError)
+		return
+	}
+
 	// Map the parsed data to your database model
-	newTransaction := entities.Payment{
+	newPayment := entities.Payment{
 		ID:        req.Payment.ID,
 		AccountID: req.Payment.AccountID,
 		RefCode:   req.Payment.RefCode,
@@ -88,10 +213,13 @@ func (ts *PaymentService) CreatePayment(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Save to database
-	if err := ts.DB.Create(&newTransaction).Error; err != nil {
+	if err := ps.DB.Create(&newPayment).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	// Commit the Payment
+	tx.Commit()
 
 	// Respond with success
 	response := SOAPEnvelope{

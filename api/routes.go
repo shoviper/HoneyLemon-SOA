@@ -112,6 +112,8 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, vp *viper.Viper) {
 			payment := v1.Group("/payments")
 			{
 				payment.Post("/getAll", services.WrapHandler(paymentService.GetAllPayments))
+				payment.Post("/getByID", services.WrapHandler(paymentService.GetPaymentByID))
+				payment.Post("/getByAccountID", services.WrapHandler(paymentService.GetPaymentsByAccountID))
 				payment.Post("/create", services.WrapHandler(paymentService.CreatePayment))
 			}
 		}

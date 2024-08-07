@@ -100,27 +100,24 @@ func (ts *TransactionService) GetTransactionByID(w http.ResponseWriter, r *http.
 		return
 	}
 
-	var transactions []entities.Transaction
-	if err := ts.DB.Where("id = ?", req.TransactionID).Find(&transactions).Error; err != nil {
+	var transaction entities.Transaction
+	if err := ts.DB.Where("id = ?", req.TransactionID).Find(&transaction).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	var transactionInfos []TransactionInfo
-	for _, transaction := range transactions {
-		transactionInfos = append(transactionInfos, TransactionInfo{
-			ID:         transaction.ID,
-			SenderID:   transaction.SenderID,
-			ReceiverID: transaction.ReceiverID,
-			Amount:     transaction.Amount,
-			CreatedAt:  transaction.CreatedAt,
-		})
+	var transactionInfo = TransactionInfo{
+		ID:         transaction.ID,
+		SenderID:   transaction.SenderID,
+		ReceiverID: transaction.ReceiverID,
+		Amount:     transaction.Amount,
+		CreatedAt:  transaction.CreatedAt,
 	}
 
 	response := SOAPEnvelope{
 		Body: SOAPBody{
-			GetTransactionsByAccountIDResponse: &GetTransactionsByAccountIDResponse{
-				Transactions: transactionInfos,
+			GetTransactionByIDResponse: &GetTransactionByIDResponse{
+				Transactions: transactionInfo,
 			},
 		},
 	}
