@@ -5,22 +5,27 @@ import (
 	"soaProject/internal/db/models"
 	local "soaProject/internal/local"
 
+	viper "github.com/spf13/viper"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
 
 type AccountService struct {
 	accountDB *gorm.DB
+	Salt int
 }
 
-func NewAccountService(db *gorm.DB) *AccountService {
-	return &AccountService{accountDB: db}
+func NewAccountService(db *gorm.DB, vp *viper.Viper) *AccountService {
+	return &AccountService{
+		accountDB: db,
+		Salt: vp.GetInt("hash.salt"),
+	}
 }
 
-func (cs *AccountService) GetAllAccounts(ctx *fiber.Ctx) error {
+func (as *AccountService) GetAllAccounts(ctx *fiber.Ctx) error {
 	var accounts []entities.Account
 
-	if err := cs.accountDB.Find(&accounts).Error; err != nil {
+	if err := as.accountDB.Find(&accounts).Error; err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
@@ -41,7 +46,7 @@ func (cs *AccountService) GetAllAccounts(ctx *fiber.Ctx) error {
 	return ctx.Status(200).JSON(accountsInfo)
 }
 
-func (cs *AccountService) CreateAccount(ctx *fiber.Ctx) error {
+func (as *AccountService) CreateAccount(ctx *fiber.Ctx) error {
 	var account models.CreateAccount
 	if err := ctx.BodyParser(&account); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -52,8 +57,10 @@ func (cs *AccountService) CreateAccount(ctx *fiber.Ctx) error {
 
 	userID := ctx.Locals("userID")
 
+	hasher := local.NewLocalConfig(as.Salt)
+
 	//hash the pin
-	hashedPin, err := local.HashPassword(account.Pin)
+	hashedPin, err := hasher.HashPassword(account.Pin)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
@@ -67,7 +74,7 @@ func (cs *AccountService) CreateAccount(ctx *fiber.Ctx) error {
 		Pin:      hashedPin,
 	}
 
-	if err := cs.accountDB.Create(&newAccount).Error; err != nil {
+	if err := as.accountDB.Create(&newAccount).Error; err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
@@ -79,7 +86,7 @@ func (cs *AccountService) CreateAccount(ctx *fiber.Ctx) error {
 	})
 }
 
-func (cs *AccountService) GetAccount(ctx *fiber.Ctx) error {
+func (as *AccountService) GetAccount(ctx *fiber.Ctx) error {
 	var account models.AccountVerify
 	account.ID = ctx.Params("id")
 	if err := ctx.BodyParser(&account); err != nil {
@@ -90,7 +97,7 @@ func (cs *AccountService) GetAccount(ctx *fiber.Ctx) error {
 	}
 
 	var accountInfo entities.Account
-	if err := cs.accountDB.Where("id = ?", account.ID).First(&accountInfo).Error; err != nil {
+	if err := as.accountDB.Where("id = ?", account.ID).First(&accountInfo).Error; err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})

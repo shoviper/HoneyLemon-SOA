@@ -73,7 +73,7 @@ func (w *fiberResponseWriter) WriteHeader(statusCode int) {
 
 func SetupRoutes(app *fiber.App, db *gorm.DB, vp *viper.Viper) {
 	clientService := services.NewClientService(db, vp)
-	accountService := services.NewAccountService(db)
+	accountService := services.NewAccountService(db, vp)
 	transactionService := services.NewTransactionService(db)
 	paymentService := services.NewPaymentService(db)
 

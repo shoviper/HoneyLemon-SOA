@@ -3,10 +3,21 @@ package local
 import (
 	"golang.org/x/crypto/bcrypt"
 
+
 )
 
-func HashPassword(password string,) (string, error) {
-    bytes, err := bcrypt.GenerateFromPassword([]byte(password), 10)
+type Local struct {
+    Salt int
+}
+
+func NewLocalConfig(salt int) *Local {
+    return &Local{
+        Salt: salt,
+    }
+}
+
+func (local *Local)HashPassword(password string) (string, error) {
+    bytes, err := bcrypt.GenerateFromPassword([]byte(password), local.Salt)
     return string(bytes), err
 }
 

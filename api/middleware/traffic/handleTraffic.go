@@ -49,5 +49,8 @@ func CheckRegisterClient(ctx *fiber.Ctx) error {
 	}
 
 	// Send the response from the second service back to the client
-	return ctx.Status(resp.StatusCode).Send(body)
+	return ctx.Status(resp.StatusCode).JSON(fiber.Map{
+		"message": "Response from second service",
+		"body":    string(body),
+	})
 }

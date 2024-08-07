@@ -17,12 +17,14 @@ import (
 type ClientService struct {
 	clientDB *gorm.DB
 	SecretKey string
+	Salt int
 }
 
 func NewClientService(db *gorm.DB, vp *viper.Viper) *ClientService {
 	return &ClientService{
 		clientDB: db,
 		SecretKey: vp.GetString("jwt.secret"),
+		Salt: vp.GetInt("hash.salt"),
 	}
 }
 
@@ -68,8 +70,10 @@ func (cs *ClientService) RegisterClient(ctx *fiber.Ctx) error {
 		})
 	}
 
+	hasher := local.NewLocalConfig(cs.Salt)
+
 	// Hash password
-	hashPassword, err := local.HashPassword(client.Password)
+	hashPassword, err := hasher.HashPassword(client.Password)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
