@@ -3,7 +3,6 @@ package services
 import (
 	"strings"
 
-
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
@@ -11,15 +10,25 @@ import (
 	viper "github.com/spf13/viper"
 )
 
+type JWT struct {
+	Secret string
+}
+
+func NewJWTConfig(v *viper.Viper) *JWT {
+	return &JWT{
+		Secret: v.GetString("jwt.secret"),
+	}
+}
+
 // JWT_Setup is a function to setup JWT middleware
-func JWT_Setup(app *fiber.App) {
+func (j *JWT)JWT_Setup(app *fiber.App) {
 	app.Use(jwtware.New(jwtware.Config{
-		SigningKey: jwtware.SigningKey{Key: []byte(viper.GetString("jwt.secret"))},
+		SigningKey: jwtware.SigningKey{Key: []byte(j.Secret)},
 	}))
 }
 
 // JWTAuth is a function to authenticate JWT token
-func JWTAuth() func(*fiber.Ctx) error {
+func (j *JWT)JWTAuth() func(*fiber.Ctx) error {
 	return (func(c *fiber.Ctx) error {
 		// read from cookie
 		cookie := c.Cookies("token")
@@ -32,7 +41,7 @@ func JWTAuth() func(*fiber.Ctx) error {
 		accessToken := strings.Replace(cookie, "Bearer ", "", 1)
 
 		token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
-			return []byte(viper.GetString("jwt.secret")), nil
+			return []byte(j.Secret), nil
 		})
 		if err != nil {
 			return c.Status(401).JSON(fiber.Map{

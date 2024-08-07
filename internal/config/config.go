@@ -21,6 +21,28 @@ func NewServerConfig(v *viper.Viper) *Server {
 	}
 }
 
+type EsbServer struct {
+	Host string
+	Port int
+}
+
+func NewEsbServerConfig(v *viper.Viper) *EsbServer {
+	return &EsbServer{
+		Host: v.GetString("esb.host"),
+		Port: v.GetInt("esb.port"),
+	}
+}
+
+type Hash struct {
+	Salt int
+}
+
+func NewHashConfig(v *viper.Viper) *Hash {
+	return &Hash{
+		Salt: v.GetInt("hash.salt"),
+	}
+}
+
 func LoadConfig(file string) (*viper.Viper, error) {
 	appConfig := viper.New()
 
