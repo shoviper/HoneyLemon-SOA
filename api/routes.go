@@ -8,6 +8,7 @@ import (
 	"soaProject/api/services"
 
 	"github.com/gofiber/fiber/v2"
+	viper "github.com/spf13/viper"
 	"github.com/valyala/fasthttp"
 	"gorm.io/gorm"
 )
@@ -70,11 +71,13 @@ func (w *fiberResponseWriter) WriteHeader(statusCode int) {
 	w.resp.SetStatusCode(statusCode)
 }
 
-func SetupRoutes(app *fiber.App, db *gorm.DB) {
-	clientService := services.NewClientService(db)
+func SetupRoutes(app *fiber.App, db *gorm.DB, vp *viper.Viper) {
+	clientService := services.NewClientService(db, vp)
 	accountService := services.NewAccountService(db)
 	transactionService := services.NewTransactionService(db)
 	paymentService := services.NewPaymentService(db)
+
+	JWTServ := services.NewJWTConfig(vp)
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World!")
@@ -94,7 +97,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 			}
 			account := v1.Group("/accounts")
 			{
-				account.Use(services.JWTAuth())
+				account.Use(JWTServ.JWTAuth())
 				account.Get("/", accountService.GetAllAccounts)
 				account.Post("/", accountService.CreateAccount)
 				account.Get("/:id", accountService.GetAccount)

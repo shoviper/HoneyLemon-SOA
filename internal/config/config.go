@@ -33,6 +33,16 @@ func NewEsbServerConfig(v *viper.Viper) *EsbServer {
 	}
 }
 
+type Hash struct {
+	Salt int
+}
+
+func NewHashConfig(v *viper.Viper) *Hash {
+	return &Hash{
+		Salt: v.GetInt("hash.salt"),
+	}
+}
+
 func LoadConfig(file string) (*viper.Viper, error) {
 	appConfig := viper.New()
 

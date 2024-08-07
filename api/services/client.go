@@ -16,10 +16,14 @@ import (
 
 type ClientService struct {
 	clientDB *gorm.DB
+	SecretKey string
 }
 
-func NewClientService(db *gorm.DB) *ClientService {
-	return &ClientService{clientDB: db}
+func NewClientService(db *gorm.DB, vp *viper.Viper) *ClientService {
+	return &ClientService{
+		clientDB: db,
+		SecretKey: vp.GetString("jwt.secret"),
+	}
 }
 
 func (cs *ClientService) GetAllClients(ctx *fiber.Ctx) error {
@@ -119,7 +123,7 @@ func (cs *ClientService) LoginClient(ctx *fiber.Ctx) error {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString([]byte(viper.GetString("jwt.secret")))
+	tokenString, err := token.SignedString([]byte(cs.SecretKey))
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),

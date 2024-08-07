@@ -6,8 +6,8 @@ import (
 	"log"
 	"soaProject/api"
 	"soaProject/api/services"
-	"soaProject/internal/db"
 	"soaProject/internal/config"
+	"soaProject/internal/db"
 
 	"soaProject/api/middleware"
 
@@ -30,10 +30,13 @@ func Server(name, value, usage string) error{
 		log.Fatalf("Error connecting to database: %v", err)
 	}
 
+
 	app1 := fiber.New()
 
-	api.SetupRoutes(app1, db)
-	services.JWT_Setup(app1)
+	api.SetupRoutes(app1, db, configDetail)
+
+	JwtSetup := services.NewJWTConfig(configDetail)
+	JwtSetup.JWT_Setup(app1)
 	
 	serverConfig := config.NewServerConfig(configDetail)
 
