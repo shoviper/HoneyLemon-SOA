@@ -16,6 +16,8 @@ type SOAPEnvelope struct {
 	Body    SOAPBody `xml:"Body"`
 }
 
+type SOAPHeader struct{}
+
 type SOAPBody struct {
 	CreateTransactionRequest           *CreateTransactionRequest           `xml:"CreateTransactionRequest,omitempty"`
 	CreateTransactionResponse          *CreateTransactionResponse          `xml:"CreateTransactionResponse,omitempty"`
