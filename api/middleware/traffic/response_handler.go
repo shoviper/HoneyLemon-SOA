@@ -87,8 +87,15 @@ func ExtractBody(jsonData []byte, responseTag string) ([]byte, error) {
 		return nil, nil
 	}
 
-	response, ok := body[responseTag]
-	if !ok {
+	// Check for NullTransactionResponse and NullPaymentResponse
+	var response interface{}
+	if r, ok := body[responseTag]; ok {
+		response = r
+	} else if r, ok := body["NullTransactionResponse"]; ok {
+		response = r
+	} else if r, ok := body["NullPaymentResponse"]; ok {
+		response = r
+	} else {
 		return nil, fmt.Errorf("expected key '%s' not found", responseTag)
 	}
 

@@ -40,6 +40,10 @@ type GetPaymentsByAccountIDResponse struct {
 	Payments []PaymentInfo `xml:"payment"`
 }
 
+type NullPaymentResponse struct {
+	Payments []string `xml:"payments"`
+}
+
 type PaymentInfo struct {
 	ID        string    `xml:"ID"`
 	AccountID string    `xml:"AccountID"`
@@ -60,6 +64,19 @@ func (ps *PaymentService) GetAllPayments(w http.ResponseWriter, r *http.Request)
 	var payments []entities.Payment
 	if err := ps.DB.Find(&payments).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if len(payments) == 0 {
+		response := SOAPEnvelope{
+			Body: SOAPBody{
+				NullPaymentResponse: &NullPaymentResponse{
+					Payments: []string{""},
+				},
+			},
+		}
+		w.Header().Set("Content-Type", "application/xml")
+		xml.NewEncoder(w).Encode(response)
 		return
 	}
 
@@ -101,8 +118,16 @@ func (ps *PaymentService) GetPaymentByID(w http.ResponseWriter, r *http.Request)
 	}
 
 	var payment entities.Payment
-	if err := ps.DB.Where("id = ?", req.PaymentID).Find(&payment).Error; err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	if err := ps.DB.Where("id = ?", req.PaymentID).Find(&payment).Error; err != nil || payment.ID == "" {
+		response := SOAPEnvelope{
+			Body: SOAPBody{
+				NullPaymentResponse: &NullPaymentResponse{
+					Payments: []string{""},
+				},
+			},
+		}
+		w.Header().Set("Content-Type", "application/xml")
+		xml.NewEncoder(w).Encode(response)
 		return
 	}
 
@@ -136,14 +161,27 @@ func (ps *PaymentService) GetPaymentsByAccountID(w http.ResponseWriter, r *http.
 	// Extract the payment request from the SOAP envelope
 	req := envelope.Body.GetPaymentsByAccountIDRequest
 
-	var payment []entities.Payment
-	if err := ps.DB.Where("account_id = ?", req.AccountID).Find(&payment).Error; err != nil {
+	var payments []entities.Payment
+	if err := ps.DB.Where("account_id = ?", req.AccountID).Find(&payments).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	if len(payments) == 0 {
+		response := SOAPEnvelope{
+			Body: SOAPBody{
+				NullPaymentResponse: &NullPaymentResponse{
+					Payments: []string{""},
+				},
+			},
+		}
+		w.Header().Set("Content-Type", "application/xml")
+		xml.NewEncoder(w).Encode(response)
+		return
+	}
+
 	var paymentInfos []PaymentInfo
-	for _, payment := range payment {
+	for _, payment := range payments {
 		paymentInfos = append(paymentInfos, PaymentInfo{
 			ID:        payment.ID,
 			AccountID: payment.AccountID,

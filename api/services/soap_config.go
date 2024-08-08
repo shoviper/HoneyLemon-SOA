@@ -26,6 +26,7 @@ type SOAPBody struct {
 	GetTransactionByIDResponse         *GetTransactionByIDResponse         `xml:"GetTransactionByIDResponse,omitempty"`
 	GetTransactionsByAccountIDRequest  *GetTransactionsByAccountIDRequest  `xml:"GetTransactionsByAccountIDRequest,omitempty"`
 	GetTransactionsByAccountIDResponse *GetTransactionsByAccountIDResponse `xml:"GetTransactionsByAccountIDResponse,omitempty"`
+	NullTransactionResponse            *NullTransactionResponse            `xml:"NullTransactionResponse,omitempty"`
 
 	CreatePaymentRequest           *CreatePaymentRequest           `xml:"CreatePaymentRequest,omitempty"`
 	CreatePaymentResponse          *CreatePaymentResponse          `xml:"CreatePaymentResponse,omitempty"`
@@ -34,6 +35,7 @@ type SOAPBody struct {
 	GetPaymentByIDResponse         *GetPaymentByIDResponse         `xml:"GetPaymentByIDResponse,omitempty"`
 	GetPaymentsByAccountIDRequest  *GetPaymentsByAccountIDRequest  `xml:"GetPaymentsByAccountIDRequest,omitempty"`
 	GetPaymentsByAccountIDResponse *GetPaymentsByAccountIDResponse `xml:"GetPaymentsByAccountIDResponse,omitempty"`
+	NullPaymentResponse            *NullPaymentResponse            `xml:"NullPaymentResponse,omitempty"`
 }
 
 func convertURI(uri *fasthttp.URI) *url.URL {
