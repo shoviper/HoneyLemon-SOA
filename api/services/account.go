@@ -90,8 +90,10 @@ func (as *AccountService) CreateAccount(ctx *fiber.Ctx) error {
 }
 
 func (as *AccountService) GetAccount(ctx *fiber.Ctx) error {
+	fmt.Println("Get account by ID")
 	var account models.AccountVerify
 	account.ID = ctx.Params("id")
+	fmt.Println(account.ID)
 	if err := ctx.BodyParser(&account); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": err.Error(),

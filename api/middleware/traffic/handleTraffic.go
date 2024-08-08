@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"soaProject/internal/db/models"
-	local "soaProject/internal/local"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -100,37 +99,30 @@ func CheckLoginClient(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to parse JSON response from second service")
 	}
 
-	randomStr := local.GenerateRandomString(10)
-	// Set a linked token in the ESB service
-	linkedToken := randomStr+"."+ loginResponse.Token
-
 	ctx.Cookie(&fiber.Cookie{
 		Name:     "esb_token",
-		Value:    linkedToken,
+		Value:    loginResponse.Token,
 		SameSite: "None",
 		Expires: time.Now().Add(24 * time.Hour),
 	})
 	
 	return ctx.Status(resp.StatusCode).JSON(fiber.Map{
 		"message": "Response from second service",
-		"token":   linkedToken,
+		"token":   loginResponse.Token,
 	})
 }
 
 func GetAllAccounts(ctx *fiber.Ctx) error {
 	//set header from cookie
-	cookie := ctx.Cookies("backend_token")
-	if cookie == "" {
-		return ctx.Status(fiber.StatusUnauthorized).SendString("Empty backend token")
-	}
-
+	cookie := ctx.Cookies("esb_token")
+	
 	//set header from cookie
 	req, err := http.NewRequest("GET", "http://localhost:3000/api/v1/accounts/", nil)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to create request to second service")
 	}
 
-	req.Header.Set("Cookie", "backend_token="+cookie)
+	req.Header.Set("Cookie", "esb_token="+cookie)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -151,9 +143,11 @@ func GetAllAccounts(ctx *fiber.Ctx) error {
 }
 
 func CreateAccount(ctx *fiber.Ctx) error {
-	cookie := ctx.Cookies("backend_token")
+	cookie := ctx.Cookies("esb_token")
 	if cookie == "" {
-		return ctx.Status(fiber.StatusUnauthorized).SendString("Empty backend token")
+		return ctx.Redirect("/esb/accounts/create")
+	}else if cookie != ctx.Locals("esb_token") {
+		return ctx.Redirect("/esb/accounts/create")
 	}
 
 	requestBody := ctx.Body()
@@ -185,7 +179,7 @@ func CreateAccount(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to create request to second service")
 	}
 
-	req.Header.Set("Cookie", "backend_token="+cookie)
+	req.Header.Set("Cookie", "esb_token="+cookie)
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
@@ -201,6 +195,62 @@ func CreateAccount(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to read response from second service")
 	}
 
+	// Send the response from the second service back to the client
+	return ctx.Status(resp.StatusCode).SendString(string(body))
+}
+
+func GetAccount(ctx *fiber.Ctx) error {
+	accountID := ctx.Params("id")
+	cookie := ctx.Cookies("esb_token")
+	// Extract the accountID from the URL
+	if accountID == "" {
+		return ctx.Status(fiber.StatusBadRequest).SendString("accountID is required")
+	}
+
+	requestBody := ctx.Body()
+
+	//check if the request body is empty
+	if len(requestBody) == 0 {
+		return ctx.Status(fiber.StatusBadRequest).SendString("Request body is empty")
+	}
+
+	//check if the request body is valid JSON
+	if !json.Valid(requestBody) {
+		return ctx.Status(fiber.StatusBadRequest).SendString("Request body is not valid JSON")
+	}
+
+	//check input fields
+	var account models.AccountVerify
+	err := json.Unmarshal(requestBody, &account)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).SendString("Failed to unmarshal request body")
+	}
+
+	if account.Pin == "" {
+		return ctx.Status(fiber.StatusBadRequest).SendString("Missing required fields")
+	}
+
+	// Make the request to the second service
+	req, err := http.NewRequest("GET", "http://localhost:3000/api/v1/accounts/"+accountID, bytes.NewBuffer(requestBody))
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to create request to second service")
+	}
+
+	req.Header.Set("Cookie", "esb_token="+cookie)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to make request to second service")
+	}
+	defer resp.Body.Close()
+
+	// Read the response body from the second service
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to read response from second service")
+	}
 	// Send the response from the second service back to the client
 	return ctx.Status(resp.StatusCode).SendString(string(body))
 }

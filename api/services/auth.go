@@ -31,10 +31,10 @@ func (j *JWT)JWT_Setup(app *fiber.App) {
 func (j *JWT)JWTAuth() func(*fiber.Ctx) error {
 	return (func(c *fiber.Ctx) error {
 		// read from cookie
-		cookie := c.Cookies("backend_token")
+		cookie := c.Cookies("esb_token")
 		if cookie == "" {
 			return c.Status(401).JSON(fiber.Map{
-				"message": "Unauthorized",
+				"message": "Unauthorized, Token not found",
 			})
 		}
 
@@ -45,14 +45,14 @@ func (j *JWT)JWTAuth() func(*fiber.Ctx) error {
 		})
 		if err != nil {
 			return c.Status(401).JSON(fiber.Map{
-				"message": "Unauthorized",
+				"message": "Unauthorized, JWT Parse Error",
 			})
 		}
 
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
 			return c.Status(401).JSON(fiber.Map{
-				"message": "Unauthorized",
+				"message": "Unauthorized, JWT Claims Error",
 			})
 		}
 

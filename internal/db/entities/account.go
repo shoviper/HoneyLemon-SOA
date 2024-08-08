@@ -27,7 +27,6 @@ func (Account) TableName() string {
 }
 
 func (c *Account) BeforeCreate(tx *gorm.DB) (err error) {
-	// Create a new ULID
 	t := time.Now().UTC()
 	entropy := ulid.Monotonic(cryptoRand.Reader, 0)
 	ulid := ulid.MustNew(ulid.Timestamp(t), entropy)
@@ -40,7 +39,14 @@ func (c *Account) BeforeCreate(tx *gorm.DB) (err error) {
 	result := new(big.Int).Mod(bigInt, modulus)
 
 	// Convert the result to a string
-	c.ID = result.String()
+	id := result.String()
+
+	// Ensure the result is 10 digits by padding with leading zeros if necessary
+	for len(id) < 10 {
+		id = "0" + id
+	}
+
+	c.ID = id
 	c.CreatedAt = time.Now()
 	c.UpdatedAt = time.Now()
 	return
