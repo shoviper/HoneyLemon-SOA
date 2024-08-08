@@ -12,6 +12,7 @@ import (
 	"soaProject/api/middleware"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 func Server(name, value, usage string) error{
@@ -31,33 +32,43 @@ func Server(name, value, usage string) error{
 	}
 
 
-	app1 := fiber.New()
+	ServiceServer := fiber.New()
 
-	api.SetupRoutes(app1, db, configDetail)
+	ServiceServer.Use(cors.New(cors.Config{
+		AllowCredentials: true,
+		AllowOrigins: "http://localhost:3000, http://localhost:4000",
+	}))
+
+	api.SetupRoutes(ServiceServer, db, configDetail)
 
 	JwtSetup := services.NewJWTConfig(configDetail)
-	JwtSetup.JWT_Setup(app1)
+	JwtSetup.JWT_Setup(ServiceServer)
 	
 	serverConfig := config.NewServerConfig(configDetail)
 
 	serverAddress := fmt.Sprintf("%s:%d", serverConfig.Host, serverConfig.Port)
 
 	go func ()  {
-		if err := app1.Listen(serverAddress); err != nil {
+		if err := ServiceServer.Listen(serverAddress); err != nil {
 			log.Fatalf("Error starting server: %v", err)
 		}
 	}()
 
-	app2 := fiber.New()
+	ESBServer := fiber.New()
 
-	middleware.ESBRoute(app2)
+	ESBServer.Use(cors.New(cors.Config{
+		AllowCredentials: true,
+		AllowOrigins: "http://localhost:3000, http://localhost:4000",
+	}))
+
+	middleware.ESBRoute(ESBServer)
 
 	esbConfig := config.NewEsbServerConfig(configDetail)
 
 	esbAddress := fmt.Sprintf("%s:%d", esbConfig.Host, esbConfig.Port)
 
 	go func ()  {
-		if err := app2.Listen(esbAddress); err != nil {
+		if err := ESBServer.Listen(esbAddress); err != nil {
 			log.Fatalf("Error starting server: %v", err)
 		}
 	}()

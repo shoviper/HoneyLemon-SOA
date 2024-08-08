@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	tf "soaProject/api/middleware/traffic"
+	breaker "soaProject/api/middleware/tokenBreaker"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -18,6 +19,13 @@ func ESBRoute(app *fiber.App) {
 	esb := app.Group("/esb")
 	{
 		esb.Post("/register", tf.CheckRegisterClient)
+		esb.Post("/login", tf.CheckLoginClient)
+
+		account := esb.Group("/accounts")
+		{
+			account.Get("/getAll", breaker.BreakToken ,tf.GetAllAccounts)
+			account.Post("/create", breaker.BreakToken, tf.CreateAccount)
+		}
 
 		transaction := esb.Group("/transactions")
 		{

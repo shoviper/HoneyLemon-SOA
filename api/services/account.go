@@ -1,12 +1,13 @@
 package services
 
 import (
+	"fmt"
 	"soaProject/internal/db/entities"
 	"soaProject/internal/db/models"
 	local "soaProject/internal/local"
 
-	viper "github.com/spf13/viper"
 	"github.com/gofiber/fiber/v2"
+	viper "github.com/spf13/viper"
 	"gorm.io/gorm"
 )
 
@@ -23,11 +24,13 @@ func NewAccountService(db *gorm.DB, vp *viper.Viper) *AccountService {
 }
 
 func (as *AccountService) GetAllAccounts(ctx *fiber.Ctx) error {
+	fmt.Println("Get all accounts")
 	var accounts []entities.Account
 
 	if err := as.accountDB.Find(&accounts).Error; err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
+			"message": "Failed to get accounts",
 		})
 
 	}

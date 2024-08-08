@@ -31,7 +31,7 @@ func (j *JWT)JWT_Setup(app *fiber.App) {
 func (j *JWT)JWTAuth() func(*fiber.Ctx) error {
 	return (func(c *fiber.Ctx) error {
 		// read from cookie
-		cookie := c.Cookies("token")
+		cookie := c.Cookies("backend_token")
 		if cookie == "" {
 			return c.Status(401).JSON(fiber.Map{
 				"message": "Unauthorized",

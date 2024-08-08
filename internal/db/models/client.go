@@ -23,3 +23,7 @@ type LoginClient struct {
 type DeleteClient struct {
 	ID string `json:"id"`
 }
+
+type LoginResponse struct {
+	Token string `json:"token"`
+}
