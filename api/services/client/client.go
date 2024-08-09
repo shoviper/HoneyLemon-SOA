@@ -1,4 +1,4 @@
-package services
+package client
 
 import (
 	"soaProject/internal/db/entities"
@@ -185,5 +185,12 @@ func (cs *ClientService) DeleteClient(ctx *fiber.Ctx) error {
 
 	return ctx.Status(200).JSON(fiber.Map{
 		"message": "Client deleted successfully",
+	})
+}
+
+func (cs *ClientService) LogoutClient(ctx *fiber.Ctx) error {
+	ctx.ClearCookie("esb_cookie")
+	return ctx.Status(200).JSON(fiber.Map{
+		"message": "Logout successfully",
 	})
 }

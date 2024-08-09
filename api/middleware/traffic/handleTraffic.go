@@ -38,7 +38,7 @@ func CheckRegisterClient(ctx *fiber.Ctx) error {
 	}
 
 	// Make the request to the second service
-	resp, err := http.Post("http://localhost:3000/api/v1/clients/register", "application/json", bytes.NewBuffer(requestBody))
+	resp, err := http.Post("http://localhost:3001/api/v1/clients/register", "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to make request to second service")
 	}
@@ -82,7 +82,7 @@ func CheckLoginClient(ctx *fiber.Ctx) error {
 	}
 
 	// Make the request to the second service
-	resp, err := http.Post("http://localhost:3000/api/v1/clients/login", "application/json", bytes.NewBuffer(requestBody))
+	resp, err := http.Post("http://localhost:3001/api/v1/clients/login", "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to make request to second service")
 	}
@@ -103,6 +103,8 @@ func CheckLoginClient(ctx *fiber.Ctx) error {
 		Name:     "esb_token",
 		Value:    loginResponse.Token,
 		SameSite: "None",
+		HTTPOnly: true,
+		Secure:   true,
 		Expires: time.Now().Add(24 * time.Hour),
 	})
 	
@@ -112,12 +114,34 @@ func CheckLoginClient(ctx *fiber.Ctx) error {
 	})
 }
 
+func DoLogout(ctx *fiber.Ctx) error {
+	res, err := http.Get("http://localhost:3001/api/v1/clients/logout")
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to make request to second service")
+	}
+
+	defer res.Body.Close()
+
+	// Read the response body from the second service
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to read response from second service")
+	}
+
+	if res.StatusCode == http.StatusOK {
+		ctx.ClearCookie("esb_token")
+	}
+
+	// Send the response from the second service back to the client
+	return ctx.Status(res.StatusCode).SendString(string(body))
+}
+
 func GetAllAccounts(ctx *fiber.Ctx) error {
 	//set header from cookie
 	cookie := ctx.Cookies("esb_token")
-	
+
 	//set header from cookie
-	req, err := http.NewRequest("GET", "http://localhost:3000/api/v1/accounts/", nil)
+	req, err := http.NewRequest("GET", "http://localhost:3002/api/v1/accounts/", nil)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to create request to second service")
 	}
@@ -169,7 +193,7 @@ func CreateAccount(ctx *fiber.Ctx) error {
 	}
 
 	// Make the request to the second service
-	req, err := http.NewRequest("POST", "http://localhost:3000/api/v1/accounts/", bytes.NewBuffer(requestBody))
+	req, err := http.NewRequest("POST", "http://localhost:3002/api/v1/accounts/", bytes.NewBuffer(requestBody))
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to create request to second service")
 	}
@@ -226,7 +250,7 @@ func GetAccount(ctx *fiber.Ctx) error {
 	}
 
 	// Make the request to the second service
-	req, err := http.NewRequest("GET", "http://localhost:3000/api/v1/accounts/clientAcc/"+accountID, bytes.NewBuffer(requestBody))
+	req, err := http.NewRequest("GET", "http://localhost:3002/api/v1/accounts/clientAcc/"+accountID, bytes.NewBuffer(requestBody))
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to create request to second service")
 	}
@@ -247,13 +271,13 @@ func GetAccount(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to read response from second service")
 	}
 	// Send the response from the second service back to the client
-	return ctx.Status(resp.StatusCode).JSON(string(body))
+	return ctx.Status(resp.StatusCode).SendString(string(body))
 }
 
 func GetAllClientAccounts(ctx *fiber.Ctx) error {
 	cookie := ctx.Cookies("esb_token")
 	//set header from cookie
-	req, err := http.NewRequest("GET", "http://localhost:3000/api/v1/accounts/clientAcc", nil)
+	req, err := http.NewRequest("GET", "http://localhost:3002/api/v1/accounts/clientAcc", nil)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to create request to second service")
 	}

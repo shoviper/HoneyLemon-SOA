@@ -1,4 +1,4 @@
-package services
+package transaction
 
 import (
 	"bytes"
@@ -27,15 +27,6 @@ type SOAPBody struct {
 	GetTransactionsByAccountIDRequest  *GetTransactionsByAccountIDRequest  `xml:"GetTransactionsByAccountIDRequest,omitempty"`
 	GetTransactionsByAccountIDResponse *GetTransactionsByAccountIDResponse `xml:"GetTransactionsByAccountIDResponse,omitempty"`
 	NullTransactionResponse            *NullTransactionResponse            `xml:"NullTransactionResponse,omitempty"`
-
-	CreatePaymentRequest           *CreatePaymentRequest           `xml:"CreatePaymentRequest,omitempty"`
-	CreatePaymentResponse          *CreatePaymentResponse          `xml:"CreatePaymentResponse,omitempty"`
-	GetAllPaymentsResponse         *GetAllPaymentsResponse         `xml:"GetAllPaymentsResponse,omitempty"`
-	GetPaymentByIDRequest          *GetPaymentByIDRequest          `xml:"GetPaymentByIDRequest,omitempty"`
-	GetPaymentByIDResponse         *GetPaymentByIDResponse         `xml:"GetPaymentByIDResponse,omitempty"`
-	GetPaymentsByAccountIDRequest  *GetPaymentsByAccountIDRequest  `xml:"GetPaymentsByAccountIDRequest,omitempty"`
-	GetPaymentsByAccountIDResponse *GetPaymentsByAccountIDResponse `xml:"GetPaymentsByAccountIDResponse,omitempty"`
-	NullPaymentResponse            *NullPaymentResponse            `xml:"NullPaymentResponse,omitempty"`
 }
 
 func convertURI(uri *fasthttp.URI) *url.URL {

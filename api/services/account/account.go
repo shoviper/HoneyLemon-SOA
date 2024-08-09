@@ -1,4 +1,4 @@
-package services
+package account
 
 import (
 	"fmt"
@@ -69,6 +69,8 @@ func (as *AccountService) CreateAccount(ctx *fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
+
+	account.Balance = 0
 
 	newAccount := entities.Account{
 		ClientID: userID.(string),
