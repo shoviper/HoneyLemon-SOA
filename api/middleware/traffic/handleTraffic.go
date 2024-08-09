@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"soaProject/internal/db/models"
+	"github.com/Nukie90/SOA-Project/internal/db/models"
 
 	"github.com/gofiber/fiber/v2"
 )

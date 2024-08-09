@@ -3,7 +3,7 @@ package middleware
 import (
 	"fmt"
 
-	tf "soaProject/api/middleware/traffic"
+	tf "github.com/Nukie90/SOA-Project/api/middleware/traffic"
 
 	"github.com/gofiber/fiber/v2"
 )

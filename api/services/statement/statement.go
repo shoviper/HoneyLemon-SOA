@@ -1,8 +1,8 @@
 package statement
 
 import (
-	"soaProject/internal/db/entities"
-	"soaProject/internal/db/models"
+	"github.com/Nukie90/SOA-Project/internal/db/entities"
+	"github.com/Nukie90/SOA-Project/internal/db/models"
 	"sort"
 	"time"
 

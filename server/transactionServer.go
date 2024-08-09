@@ -4,11 +4,11 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"soaProject/api/services"
-	"soaProject/internal/config"
-	"soaProject/internal/db"
+	"github.com/Nukie90/SOA-Project/api/services"
+	"github.com/Nukie90/SOA-Project/internal/config"
+	"github.com/Nukie90/SOA-Project/internal/db"
 
-	trans "soaProject/api/services/transaction"
+	trans "github.com/Nukie90/SOA-Project/api/services/transaction"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"

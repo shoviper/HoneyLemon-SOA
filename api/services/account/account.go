@@ -2,9 +2,9 @@ package account
 
 import (
 	"fmt"
-	"soaProject/internal/db/entities"
-	"soaProject/internal/db/models"
-	local "soaProject/internal/local"
+	"github.com/Nukie90/SOA-Project/internal/db/entities"
+	"github.com/Nukie90/SOA-Project/internal/db/models"
+	local "github.com/Nukie90/SOA-Project/internal/local"
 
 	"github.com/gofiber/fiber/v2"
 	viper "github.com/spf13/viper"

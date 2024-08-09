@@ -3,7 +3,7 @@ package db
 import (
 	"fmt"
 	"log"
-	"soaProject/internal/db/entities"
+	"github.com/Nukie90/SOA-Project/internal/db/entities"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

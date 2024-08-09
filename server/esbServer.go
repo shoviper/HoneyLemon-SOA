@@ -4,10 +4,10 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"soaProject/api/services"
-	"soaProject/internal/config"
+	"github.com/Nukie90/SOA-Project/api/services"
+	"github.com/Nukie90/SOA-Project/internal/config"
 
-	"soaProject/api/middleware"
+	"github.com/Nukie90/SOA-Project/api/middleware"
 	
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"

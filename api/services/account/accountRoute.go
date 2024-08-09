@@ -1,7 +1,7 @@
 package account
 
 import (
-	"soaProject/api/services"
+	"github.com/Nukie90/SOA-Project/api/services"
 
 	"github.com/gofiber/fiber/v2"
 	viper "github.com/spf13/viper"

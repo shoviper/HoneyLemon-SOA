@@ -3,7 +3,7 @@ package payment
 import (
 	"encoding/xml"
 	"net/http"
-	"soaProject/internal/db/entities"
+	"github.com/Nukie90/SOA-Project/internal/db/entities"
 	"time"
 
 	"gorm.io/gorm"

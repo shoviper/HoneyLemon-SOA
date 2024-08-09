@@ -1,7 +1,7 @@
 package main
 
 import (
-	"soaProject/server"
+	"github.com/Nukie90/SOA-Project/server"
 )
 
 func main() {
