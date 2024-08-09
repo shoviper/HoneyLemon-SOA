@@ -1,4 +1,4 @@
-package services
+package client
 
 import (
 	"soaProject/internal/db/entities"

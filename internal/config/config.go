@@ -33,6 +33,30 @@ func NewEsbServerConfig(v *viper.Viper) *EsbServer {
 	}
 }
 
+type ClientServer struct {
+	Host string
+	Port int
+}
+
+func NewClientServerConfig(v *viper.Viper) *ClientServer {
+	return &ClientServer{
+		Host: v.GetString("client.host"),
+		Port: v.GetInt("client.port"),
+	}
+}
+
+type AccServer struct {
+	Host string
+	Port int
+}
+
+func NewAccServerConfig(v *viper.Viper) *AccServer {
+	return &AccServer{
+		Host: v.GetString("acc.host"),
+		Port: v.GetInt("acc.port"),
+	}
+}
+
 type Hash struct {
 	Salt int
 }

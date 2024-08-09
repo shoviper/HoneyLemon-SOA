@@ -1,4 +1,4 @@
-package cmd
+package server
 
 import (
 	"flag"
@@ -8,6 +8,9 @@ import (
 	"soaProject/api/services"
 	"soaProject/internal/config"
 	"soaProject/internal/db"
+
+	acc "soaProject/api/services/account"
+	client "soaProject/api/services/client"
 
 	"soaProject/api/middleware"
 
@@ -36,7 +39,7 @@ func Server(name, value, usage string) error{
 
 	ServiceServer.Use(cors.New(cors.Config{
 		AllowCredentials: true,
-		AllowOrigins: "http://localhost:3000, http://localhost:4000",
+		AllowOrigins: "http://localhost:3000, http://localhost:4000 , http://localhost:3002",
 	}))
 
 	api.SetupRoutes(ServiceServer, db, configDetail)
@@ -58,7 +61,7 @@ func Server(name, value, usage string) error{
 
 	ESBServer.Use(cors.New(cors.Config{
 		AllowCredentials: true,
-		AllowOrigins: "http://localhost:3000, http://localhost:4000",
+		AllowOrigins: "http://localhost:3000, http://localhost:4000, http://localhost:3002",
 	}))
 
 	middleware.ESBRoute(ESBServer)
@@ -69,6 +72,42 @@ func Server(name, value, usage string) error{
 
 	go func ()  {
 		if err := ESBServer.Listen(esbAddress); err != nil {
+			log.Fatalf("Error starting server: %v", err)
+		}
+	}()
+
+	ClientServer := fiber.New()
+
+	ClientServer.Use(cors.New(cors.Config{
+		AllowCredentials: true,
+		AllowOrigins: "http://localhost:3000, http://localhost:4000, http://localhost:3002",
+	}))
+
+	client.SetupClientRoute(ClientServer, db, configDetail)
+	clientService := config.NewClientServerConfig(configDetail)
+
+	clientAddress := fmt.Sprintf("%s:%d", clientService.Host, clientService.Port)
+
+	go func ()  {
+		if err := ClientServer.Listen(clientAddress); err != nil {
+			log.Fatalf("Error starting server: %v", err)
+		}
+	}()
+
+	AccServer := fiber.New()
+
+	AccServer.Use(cors.New(cors.Config{
+		AllowCredentials: true,
+		AllowOrigins: "http://localhost:3000, http://localhost:4000, http://localhost:3002",
+	}))
+
+	acc.SetupAccountRoute(AccServer, db, configDetail)
+	accountService := config.NewAccServerConfig(configDetail)
+
+	accountAddress := fmt.Sprintf("%s:%d", accountService.Host, accountService.Port)
+
+	go func ()  {
+		if err := AccServer.Listen(accountAddress); err != nil {
 			log.Fatalf("Error starting server: %v", err)
 		}
 	}()
