@@ -187,3 +187,10 @@ func (cs *ClientService) DeleteClient(ctx *fiber.Ctx) error {
 		"message": "Client deleted successfully",
 	})
 }
+
+func (cs *ClientService) LogoutClient(ctx *fiber.Ctx) error {
+	ctx.ClearCookie("esb_cookie")
+	return ctx.Status(200).JSON(fiber.Map{
+		"message": "Logout successfully",
+	})
+}

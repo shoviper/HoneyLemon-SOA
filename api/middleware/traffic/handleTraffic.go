@@ -114,10 +114,32 @@ func CheckLoginClient(ctx *fiber.Ctx) error {
 	})
 }
 
+func DoLogout(ctx *fiber.Ctx) error {
+	res, err := http.Get("http://localhost:3001/api/v1/clients/logout")
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to make request to second service")
+	}
+
+	defer res.Body.Close()
+
+	// Read the response body from the second service
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to read response from second service")
+	}
+
+	if res.StatusCode == http.StatusOK {
+		ctx.ClearCookie("esb_token")
+	}
+
+	// Send the response from the second service back to the client
+	return ctx.Status(res.StatusCode).SendString(string(body))
+}
+
 func GetAllAccounts(ctx *fiber.Ctx) error {
 	//set header from cookie
 	cookie := ctx.Cookies("esb_token")
-	
+
 	//set header from cookie
 	req, err := http.NewRequest("GET", "http://localhost:3002/api/v1/accounts/", nil)
 	if err != nil {

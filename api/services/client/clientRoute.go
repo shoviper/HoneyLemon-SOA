@@ -19,7 +19,7 @@ func SetupClientRoute(app *fiber.App, db *gorm.DB, vp *viper.Viper) {
 				client.Post("/register", cs.RegisterClient)
 				client.Post("/login", cs.LoginClient)
 				client.Delete("/", cs.DeleteClient)
-
+				client.Get("/logout", cs.LogoutClient)
 			}
 		}
 	}

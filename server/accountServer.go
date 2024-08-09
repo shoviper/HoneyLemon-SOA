@@ -8,13 +8,13 @@ import (
 	"soaProject/internal/config"
 	"soaProject/internal/db"
 
-	client "soaProject/api/services/client"
+	acc "soaProject/api/services/account"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
-func ClientServer(name, value, usage string) error {
+func AccountServer(name, value, usage string) error {
 	envFlag := flag.String(name, value, usage)
 
 	flag.Parse()
@@ -30,22 +30,22 @@ func ClientServer(name, value, usage string) error {
 		log.Fatalf("Error connecting to database: %v", err)
 	}
 
-	ClientServer := fiber.New()
+	accountServer := fiber.New()
 
-	ClientServer.Use(cors.New(cors.Config{
+	accountServer.Use(cors.New(cors.Config{
 		AllowCredentials: true,
 		AllowOrigins:     "http://localhost:4000",
 	}))
 
-	client.SetupClientRoute(ClientServer, db, configDetail)
-	clientConfig := config.NewClientServerConfig(configDetail)
+	acc.SetupAccountRoute(accountServer, db, configDetail)
+	accountConfig := config.NewAccServerConfig(configDetail)
 
 	JwtSetup := services.NewJWTConfig(configDetail)
-	JwtSetup.JWT_Setup(ClientServer)
+	JwtSetup.JWT_Setup(accountServer)
 
-	clientAddress := fmt.Sprintf("%s:%d", clientConfig.Host, clientConfig.Port)
+	accountAddress := fmt.Sprintf("%s:%d", accountConfig.Host, accountConfig.Port)
 
-	if err := ClientServer.Listen(clientAddress); err != nil {
+	if err := accountServer.Listen(accountAddress); err != nil {
 		log.Fatalf("Error starting server: %v", err)
 	}
 

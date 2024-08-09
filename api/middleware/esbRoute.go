@@ -19,6 +19,7 @@ func ESBRoute(app *fiber.App) {
 	{
 		esb.Post("/register", tf.CheckRegisterClient)
 		esb.Post("/login", tf.CheckLoginClient)
+		esb.Get("/logout", tf.DoLogout)
 
 		account := esb.Group("/accounts")
 		{

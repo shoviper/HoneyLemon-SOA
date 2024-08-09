@@ -27,7 +27,7 @@ func ESBServer(name, value, usage string) error {
 
 	ESBServer.Use(cors.New(cors.Config{
 		AllowCredentials: true,
-		AllowOrigins: "http://localhost:3000, http://localhost:4000, http://localhost:3002",
+		AllowOrigins:     "http://localhost:3001, http://localhost:3002",
 	}))
 
 	middleware.ESBRoute(ESBServer)
