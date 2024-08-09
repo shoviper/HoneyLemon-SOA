@@ -261,11 +261,9 @@ func (ts *TransactionService) CreateTransaction(w http.ResponseWriter, r *http.R
 
 	// Create and save the new transaction
 	newTransaction := entities.Transaction{
-		ID:         req.Transaction.ID,
 		SenderID:   req.Transaction.SenderID,
 		ReceiverID: req.Transaction.ReceiverID,
 		Amount:     req.Transaction.Amount,
-		CreatedAt:  time.Now(),
 	}
 
 	if err := tx.Create(&newTransaction).Error; err != nil {
@@ -276,6 +274,10 @@ func (ts *TransactionService) CreateTransaction(w http.ResponseWriter, r *http.R
 
 	// Commit the transaction
 	tx.Commit()
+
+	// Use the saved payment to include ID and timestamps in the response
+	req.Transaction.ID = newTransaction.ID
+	req.Transaction.CreatedAt = newTransaction.CreatedAt
 
 	// Respond with success
 	response := SOAPEnvelope{

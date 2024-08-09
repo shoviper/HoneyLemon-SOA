@@ -243,11 +243,9 @@ func (ps *PaymentService) CreatePayment(w http.ResponseWriter, r *http.Request) 
 
 	// Map the parsed data to your database model
 	newPayment := entities.Payment{
-		ID:        req.Payment.ID,
 		AccountID: req.Payment.AccountID,
 		RefCode:   req.Payment.RefCode,
 		Amount:    req.Payment.Amount,
-		CreatedAt: time.Now(),
 	}
 
 	// Save to database
@@ -255,6 +253,10 @@ func (ps *PaymentService) CreatePayment(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	// Use the saved payment to include ID and timestamps in the response
+	req.Payment.ID = newPayment.ID
+	req.Payment.CreatedAt = newPayment.CreatedAt
 
 	// Commit the Payment
 	tx.Commit()

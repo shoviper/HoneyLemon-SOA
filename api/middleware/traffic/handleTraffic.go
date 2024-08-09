@@ -468,10 +468,6 @@ func CreateTransaction(ctx *fiber.Ctx) error {
 	}
 
 	// Extract values from the parsed JSON
-	transactionID, ok := requestBody["transactionID"].(string)
-	if !ok {
-		return ctx.Status(fiber.StatusBadRequest).SendString("Missing or invalid transactionID")
-	}
 	senderID, ok := requestBody["senderID"].(string)
 	if !ok {
 		return ctx.Status(fiber.StatusBadRequest).SendString("Missing or invalid senderID")
@@ -492,14 +488,13 @@ func CreateTransaction(ctx *fiber.Ctx) error {
         <soapenv:Body>
             <tns:CreateTransactionRequest>
 				<tns:transaction>
-					<tns:ID>%s</tns:ID>
 					<tns:SenderID>%s</tns:SenderID>
 					<tns:ReceiverID>%s</tns:ReceiverID>
 					<tns:Amount>%f</tns:Amount>
 				</tns:transaction>
             </tns:CreateTransactionRequest>
         </soapenv:Body>
-    </soapenv:Envelope>`, transactionID, senderID, receiverID, amount)
+    </soapenv:Envelope>`, senderID, receiverID, amount)
 
 	// Send the XML request to the specified endpoint
 	url := "http://localhost:3003/api/v1/transactions/create"
@@ -706,10 +701,6 @@ func CreatePayment(ctx *fiber.Ctx) error {
 	}
 
 	// Extract values from the parsed JSON
-	paymentID, ok := requestBody["paymentID"].(string)
-	if !ok {
-		return ctx.Status(fiber.StatusBadRequest).SendString("Missing or invalid transactionID")
-	}
 	accountID, ok := requestBody["accountID"].(string)
 	if !ok {
 		return ctx.Status(fiber.StatusBadRequest).SendString("Missing or invalid senderID")
@@ -730,14 +721,13 @@ func CreatePayment(ctx *fiber.Ctx) error {
         <soapenv:Body>
             <tns:CreatePaymentRequest>
 				<tns:payment>
-					<tns:ID>%s</tns:ID>
 					<tns:AccountID>%s</tns:AccountID>
 					<tns:RefCode>%s</tns:RefCode>
 					<tns:Amount>%f</tns:Amount>
 				</tns:payment>
             </tns:CreatePaymentRequest>
         </soapenv:Body>
-    </soapenv:Envelope>`, paymentID, accountID, refCode, amount)
+    </soapenv:Envelope>`, accountID, refCode, amount)
 
 	// Send the XML request to the specified endpoint
 	url := "http://localhost:3004/api/v1/payments/create"
