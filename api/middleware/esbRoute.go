@@ -43,5 +43,9 @@ func ESBRoute(app *fiber.App) {
 			payment.Get("/getByAccountID", tf.GetPaymentsByAccountID)
 			payment.Post("/create", tf.CreatePayment)
 		}
+		statement := esb.Group("/statements")
+		{
+			statement.Get("/", tf.GetStatement)
+		}
 	}
 }

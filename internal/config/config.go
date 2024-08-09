@@ -81,6 +81,18 @@ func NewPaymentServerConfig(v *viper.Viper) *PaymentServer {
 	}
 }
 
+type StatementServer struct {
+	Host string
+	Port int
+}
+
+func NewStatementServerConfig(v *viper.Viper) *StatementServer {
+	return &StatementServer{
+		Host: v.GetString("statement.host"),
+		Port: v.GetInt("statement.port"),
+	}
+}
+
 type Hash struct {
 	Salt int
 }
@@ -118,4 +130,3 @@ func LoadConfig(file string) (*viper.Viper, error) {
 	return appConfig, nil
 
 }
-

@@ -105,9 +105,9 @@ func CheckLoginClient(ctx *fiber.Ctx) error {
 		SameSite: "None",
 		HTTPOnly: true,
 		Secure:   true,
-		Expires: time.Now().Add(24 * time.Hour),
+		Expires:  time.Now().Add(24 * time.Hour),
 	})
-	
+
 	return ctx.Status(resp.StatusCode).JSON(fiber.Map{
 		"message": "Response from second service",
 		"token":   loginResponse.Token,
@@ -154,7 +154,6 @@ func GetAllAccounts(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to make request to second service")
 	}
 	defer resp.Body.Close()
-
 
 	// Read the response body from the second service
 	body, err := io.ReadAll(resp.Body)
@@ -312,7 +311,7 @@ func GetAllTransactions(ctx *fiber.Ctx) error {
 	</soapenv:Envelope>`)
 
 	// Send the XML request to the specified endpoint
-	url := "http://localhost:3000/api/v1/transactions/getAll"
+	url := "http://localhost:3003/api/v1/transactions/getAll"
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(requestBody)))
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Error creating request: " + err.Error())
@@ -367,7 +366,7 @@ func GetTransactionByID(ctx *fiber.Ctx) error {
     </soapenv:Envelope>`, transactionID)
 
 	// Send the XML request to the specified endpoint
-	url := "http://localhost:3000/api/v1/transactions/getByID"
+	url := "http://localhost:3003/api/v1/transactions/getByID"
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(requestBody)))
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Error creating request: " + err.Error())
@@ -422,7 +421,7 @@ func GetTransactionsByAccountID(ctx *fiber.Ctx) error {
     </soapenv:Envelope>`, accountID)
 
 	// Send the XML request to the specified endpoint
-	url := "http://localhost:3000/api/v1/transactions/getByAccountID"
+	url := "http://localhost:3003/api/v1/transactions/getByAccountID"
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(requestBody)))
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Error creating request: " + err.Error())
@@ -503,7 +502,7 @@ func CreateTransaction(ctx *fiber.Ctx) error {
     </soapenv:Envelope>`, transactionID, senderID, receiverID, amount)
 
 	// Send the XML request to the specified endpoint
-	url := "http://localhost:3000/api/v1/transactions/create"
+	url := "http://localhost:3003/api/v1/transactions/create"
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(requestBodyXML)))
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Error creating request: " + err.Error())
@@ -550,7 +549,7 @@ func GetAllPayments(ctx *fiber.Ctx) error {
 	</soapenv:Envelope>`)
 
 	// Send the XML request to the specified endpoint
-	url := "http://localhost:3000/api/v1/payments/getAll"
+	url := "http://localhost:3004/api/v1/payments/getAll"
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(requestBody)))
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Error creating request: " + err.Error())
@@ -605,7 +604,7 @@ func GetPaymentByID(ctx *fiber.Ctx) error {
     </soapenv:Envelope>`, paymentID)
 
 	// Send the XML request to the specified endpoint
-	url := "http://localhost:3000/api/v1/payments/getByID"
+	url := "http://localhost:3004/api/v1/payments/getByID"
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(requestBody)))
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Error creating request: " + err.Error())
@@ -660,7 +659,7 @@ func GetPaymentsByAccountID(ctx *fiber.Ctx) error {
     </soapenv:Envelope>`, accountID)
 
 	// Send the XML request to the specified endpoint
-	url := "http://localhost:3000/api/v1/payments/getByAccountID"
+	url := "http://localhost:3004/api/v1/payments/getByAccountID"
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(requestBody)))
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Error creating request: " + err.Error())
@@ -741,7 +740,7 @@ func CreatePayment(ctx *fiber.Ctx) error {
     </soapenv:Envelope>`, paymentID, accountID, refCode, amount)
 
 	// Send the XML request to the specified endpoint
-	url := "http://localhost:3000/api/v1/payments/create"
+	url := "http://localhost:3004/api/v1/payments/create"
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(requestBodyXML)))
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Error creating request: " + err.Error())
@@ -775,4 +774,50 @@ func CreatePayment(ctx *fiber.Ctx) error {
 
 	// Return the response back to the client
 	return ctx.Status(resp.StatusCode).SendString(string(bodyJson))
+}
+
+func GetStatement(ctx *fiber.Ctx) error {
+	// Extract query parameters
+	accountID := ctx.Query("accountID")
+	start := ctx.Query("start")
+	end := ctx.Query("end")
+
+	// Set up the URL with query parameters
+	url := fmt.Sprintf("http://localhost:3005/api/v1/statements?accountID=%s&start=%s&end=%s", accountID, start, end)
+
+	// Create a new HTTP request
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to create request to second service")
+	}
+
+	// Manually copy headers from fasthttp.RequestHeader to http.Header
+	ctx.Request().Header.VisitAll(func(key, value []byte) {
+		req.Header.Set(string(key), string(value))
+	})
+
+	// Create a new HTTP client and perform the request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to forward request to second service")
+	}
+	defer resp.Body.Close()
+
+	// Read the response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to read response from second service")
+	}
+
+	// Set the response status code and headers in the Fiber context
+	ctx.Status(resp.StatusCode)
+	for key, values := range resp.Header {
+		for _, value := range values {
+			ctx.Set(key, value)
+		}
+	}
+
+	// Send the response body back to the client
+	return ctx.Send(body)
 }
