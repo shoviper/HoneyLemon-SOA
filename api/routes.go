@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"soaProject/api/services"
+	// "soaProject/api/services"
 
 	"github.com/gofiber/fiber/v2"
 	viper "github.com/spf13/viper"
@@ -74,8 +74,8 @@ func (w *fiberResponseWriter) WriteHeader(statusCode int) {
 func SetupRoutes(app *fiber.App, db *gorm.DB, vp *viper.Viper) {
 	// clientService := services.NewClientService(db, vp)
 	// accountService := services.NewAccountService(db, vp)
-	transactionService := services.NewTransactionService(db)
-	paymentService := services.NewPaymentService(db)
+	// transactionService := services.NewTransactionService(db)
+	// paymentService := services.NewPaymentService(db)
 
 	// JWTServ := services.NewJWTConfig(vp)
 
@@ -87,6 +87,12 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, vp *viper.Viper) {
 	{
 		v1 := api.Group("/v1")
 		{
+			v1.Get("/", func(c *fiber.Ctx) error {
+				return c.SendString("Hello, World!")
+			})
+		}
+	}
+}	
 			// client := v1.Group("/clients")
 			// {
 			// 	client.Get("/", clientService.GetAllClients)
@@ -103,20 +109,17 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, vp *viper.Viper) {
 			// 	account.Get("/clientAcc/:id", accountService.GetAccount)
 			// 	account.Get("/clientAcc", accountService.GetAllClientAccounts)
 			// }
-			transaction := v1.Group("/transactions")
-			{
-				transaction.Post("/getAll", services.WrapHandler(transactionService.GetAllTransactions))
-				transaction.Post("/getByID", services.WrapHandler(transactionService.GetTransactionByID))
-				transaction.Post("/getByAccountID", services.WrapHandler(transactionService.GetTransactionsByAccountID))
-				transaction.Post("/create", services.WrapHandler(transactionService.CreateTransaction))
-			}
-			payment := v1.Group("/payments")
-			{
-				payment.Post("/getAll", services.WrapHandler(paymentService.GetAllPayments))
-				payment.Post("/getByID", services.WrapHandler(paymentService.GetPaymentByID))
-				payment.Post("/getByAccountID", services.WrapHandler(paymentService.GetPaymentsByAccountID))
-				payment.Post("/create", services.WrapHandler(paymentService.CreatePayment))
-			}
-		}
-	}
-}
+			// transaction := v1.Group("/transactions")
+			// {
+			// 	transaction.Post("/getAll", services.WrapHandler(transactionService.GetAllTransactions))
+			// 	transaction.Post("/getByID", services.WrapHandler(transactionService.GetTransactionByID))
+			// 	transaction.Post("/getByAccountID", services.WrapHandler(transactionService.GetTransactionsByAccountID))
+			// 	transaction.Post("/create", services.WrapHandler(transactionService.CreateTransaction))
+			// }
+			// payment := v1.Group("/payments")
+			// {
+			// 	payment.Post("/getAll", services.WrapHandler(paymentService.GetAllPayments))
+			// 	payment.Post("/getByID", services.WrapHandler(paymentService.GetPaymentByID))
+			// 	payment.Post("/getByAccountID", services.WrapHandler(paymentService.GetPaymentsByAccountID))
+			// 	payment.Post("/create", services.WrapHandler(paymentService.CreatePayment))
+			// }

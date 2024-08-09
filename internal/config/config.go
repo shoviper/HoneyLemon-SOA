@@ -57,6 +57,30 @@ func NewAccServerConfig(v *viper.Viper) *AccServer {
 	}
 }
 
+type TransactionServer struct {
+	Host string
+	Port int
+}
+
+func NewTransactionServerConfig(v *viper.Viper) *TransactionServer {
+	return &TransactionServer{
+		Host: v.GetString("transaction.host"),
+		Port: v.GetInt("transaction.port"),
+	}
+}
+
+type PaymentServer struct {
+	Host string
+	Port int
+}
+
+func NewPaymentServerConfig(v *viper.Viper) *PaymentServer {
+	return &PaymentServer{
+		Host: v.GetString("payment.host"),
+		Port: v.GetInt("payment.port"),
+	}
+}
+
 type Hash struct {
 	Salt int
 }
