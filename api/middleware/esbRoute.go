@@ -25,6 +25,7 @@ func ESBRoute(app *fiber.App) {
 			account.Get("/getAll", tf.GetAllAccounts)
 			account.Post("/create", tf.CreateAccount)
 			account.Get("/getByID/:id", tf.GetAccount)
+			account.Get("/clientAcc", tf.GetAllClientAccounts)
 		}
 
 		transaction := esb.Group("/transactions")

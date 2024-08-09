@@ -128,3 +128,27 @@ func (as *AccountService) GetAccount(ctx *fiber.Ctx) error {
 
 	return ctx.Status(200).JSON(accountBalance)
 }
+
+func (as *AccountService) GetAllClientAccounts(ctx *fiber.Ctx) error {
+	fmt.Println("Get all client's accounts")
+	userID := ctx.Locals("userID")
+
+	var accounts []entities.Account
+	if err := as.accountDB.Where("client_id = ?", userID).Find(&accounts).Error; err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+			"message": "Failed to get accounts",
+		})
+	}
+
+	var accountsInfo []models.AccountBalance
+	for _, account := range accounts {
+		accountsInfo = append(accountsInfo, models.AccountBalance{
+			ID:       account.ID,
+			Type:     account.Type,
+			Balance:  account.Balance,
+		})
+	}
+
+	return ctx.Status(200).JSON(accountsInfo)
+}

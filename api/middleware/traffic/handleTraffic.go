@@ -144,11 +144,6 @@ func GetAllAccounts(ctx *fiber.Ctx) error {
 
 func CreateAccount(ctx *fiber.Ctx) error {
 	cookie := ctx.Cookies("esb_token")
-	if cookie == "" {
-		return ctx.Redirect("/esb/accounts/create")
-	}else if cookie != ctx.Locals("esb_token") {
-		return ctx.Redirect("/esb/accounts/create")
-	}
 
 	requestBody := ctx.Body()
 
@@ -231,7 +226,7 @@ func GetAccount(ctx *fiber.Ctx) error {
 	}
 
 	// Make the request to the second service
-	req, err := http.NewRequest("GET", "http://localhost:3000/api/v1/accounts/"+accountID, bytes.NewBuffer(requestBody))
+	req, err := http.NewRequest("GET", "http://localhost:3000/api/v1/accounts/clientAcc/"+accountID, bytes.NewBuffer(requestBody))
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to create request to second service")
 	}
@@ -251,6 +246,33 @@ func GetAccount(ctx *fiber.Ctx) error {
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to read response from second service")
 	}
+	// Send the response from the second service back to the client
+	return ctx.Status(resp.StatusCode).JSON(string(body))
+}
+
+func GetAllClientAccounts(ctx *fiber.Ctx) error {
+	cookie := ctx.Cookies("esb_token")
+	//set header from cookie
+	req, err := http.NewRequest("GET", "http://localhost:3000/api/v1/accounts/clientAcc", nil)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to create request to second service")
+	}
+
+	req.Header.Set("Cookie", "esb_token="+cookie)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to make request to second service")
+	}
+	defer resp.Body.Close()
+
+	// Read the response body from the second service
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to read response from second service")
+	}
+
 	// Send the response from the second service back to the client
 	return ctx.Status(resp.StatusCode).SendString(string(body))
 }

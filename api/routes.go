@@ -100,7 +100,8 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, vp *viper.Viper) {
 				account.Use(JWTServ.JWTAuth())
 				account.Get("/", accountService.GetAllAccounts)
 				account.Post("/", accountService.CreateAccount)
-				account.Get("/:id", accountService.GetAccount)
+				account.Get("/clientAcc/:id", accountService.GetAccount)
+				account.Get("/clientAcc", accountService.GetAllClientAccounts)
 			}
 			transaction := v1.Group("/transactions")
 			{
