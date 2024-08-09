@@ -76,6 +76,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, vp *viper.Viper) {
 	accountService := services.NewAccountService(db, vp)
 	transactionService := services.NewTransactionService(db)
 	paymentService := services.NewPaymentService(db)
+	statementService := services.NewStatementService(db, vp)
 
 	JWTServ := services.NewJWTConfig(vp)
 
@@ -115,6 +116,10 @@ func SetupRoutes(app *fiber.App, db *gorm.DB, vp *viper.Viper) {
 				payment.Post("/getByID", services.WrapHandler(paymentService.GetPaymentByID))
 				payment.Post("/getByAccountID", services.WrapHandler(paymentService.GetPaymentsByAccountID))
 				payment.Post("/create", services.WrapHandler(paymentService.CreatePayment))
+			}
+			statement := v1.Group("/statements")
+			{
+				statement.Get("/", statementService.GetStatement)
 			}
 		}
 	}
