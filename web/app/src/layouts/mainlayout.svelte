@@ -21,7 +21,7 @@
       <button class="bg-white text-black px-4 py-2 rounded transition-all duration-300 ease-in-out hover:opacity-70">Log in</button>
     </Link>
     <Link to="/signup">
-      <button class="bg-green-500 text-white px-4 py-2 rounded mr-1 transition-all duration-300 ease-in-out hover:opacity-70">Sign up</button>
+      <button class="bg-[#28A745] text-white px-4 py-2 rounded mr-1 transition-all duration-300 ease-in-out hover:opacity-70">Sign up</button>
     </Link>
   </div>
 </div>
