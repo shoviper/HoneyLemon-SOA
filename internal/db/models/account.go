@@ -22,5 +22,5 @@ type AccountVerify struct {
 type AccountBalance struct {
 	ID      string  `json:"id"`
 	Balance float64 `json:"balance"`
-	Type	string  `json:"type"`
+	Type    string  `json:"type"`
 }

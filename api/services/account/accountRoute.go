@@ -24,6 +24,8 @@ func SetupAccountRoute(app *fiber.App, db *gorm.DB, vp *viper.Viper) {
 				accounts.Post("/", as.CreateAccount)
 				accounts.Get("/clientAcc/:id", as.GetAccount)
 				accounts.Get("/clientAcc", as.GetAllClientAccounts)
+				accounts.Patch("/changePin", as.ChangePin)
+				accounts.Delete("/deleteAcc", as.DeleteAccount)
 			}
 		}
 	}
