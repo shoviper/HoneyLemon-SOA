@@ -300,6 +300,89 @@ func GetAllClientAccounts(ctx *fiber.Ctx) error {
 	return ctx.Status(resp.StatusCode).SendString(string(body))
 }
 
+func ChangePin(ctx *fiber.Ctx) error {
+	cookie := ctx.Cookies("esb_token")
+
+	requestBody := ctx.Body()
+
+	// Check if the request body is empty
+	if len(requestBody) == 0 {
+		return ctx.Status(fiber.StatusBadRequest).SendString("Request body is empty")
+	}
+
+	// Check if the request body is valid JSON
+	if !json.Valid(requestBody) {
+		return ctx.Status(fiber.StatusBadRequest).SendString("Request body is not valid JSON")
+	}
+
+	// Make the request to the second service
+	req, err := http.NewRequest("PATCH", "http://localhost:3002/api/v1/accounts/changePin", bytes.NewBuffer(requestBody))
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to create request to second service")
+	}
+
+	req.Header.Set("Cookie", "esb_token="+cookie)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to make request to second service")
+	}
+	defer resp.Body.Close()
+
+	// Read the response body from the second service
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to read response from second service")
+	}
+
+	// Send the response from the second service back to the client
+	return ctx.Status(resp.StatusCode).SendString(string(body))
+}
+
+func DeleteAccount(ctx *fiber.Ctx) error {
+	cookie := ctx.Cookies("esb_token")
+
+	requestBody := ctx.Body()
+
+	// Check if the request body is empty
+	if len(requestBody) == 0 {
+		return ctx.Status(fiber.StatusBadRequest).SendString("Request body is empty")
+	}
+
+	// Check if the request body is valid JSON
+	if !json.Valid(requestBody) {
+		return ctx.Status(fiber.StatusBadRequest).SendString("Request body is not valid JSON")
+	}
+
+	fmt.Println(string(requestBody))
+	// Make the request to the second service
+	req, err := http.NewRequest("DELETE", "http://localhost:3002/api/v1/accounts/deleteAcc", bytes.NewBuffer(requestBody))
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to create request to second service")
+	}
+
+	req.Header.Set("Cookie", "esb_token="+cookie)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to make request to second service")
+	}
+	defer resp.Body.Close()
+
+	// Read the response body from the second service
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to read response from second service")
+	}
+
+	// Send the response from the second service back to the client
+	return ctx.Status(resp.StatusCode).SendString(string(body))
+}
+
 func GetAllTransactions(ctx *fiber.Ctx) error {
 	// Create the request body for the SOAP request
 	requestBody := fmt.Sprintf(`
