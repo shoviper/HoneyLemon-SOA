@@ -3,7 +3,7 @@ package db
 import (
 	"fmt"
 	"log"
-	"soaProject/internal/db/entities"
+	"github.com/Nukie90/SOA-Project/internal/db/entities"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -44,4 +44,5 @@ func (cf *Config) Migrate(db *gorm.DB) {
 	db.AutoMigrate(&entities.Client{})
 	db.AutoMigrate(&entities.Account{})
 	db.AutoMigrate(&entities.Transaction{})
+	db.AutoMigrate(&entities.Payment{})
 }
