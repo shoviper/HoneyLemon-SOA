@@ -3,10 +3,10 @@ package server
 import (
 	"flag"
 	"fmt"
-	"log"
 	"github.com/Nukie90/SOA-Project/api/services"
 	"github.com/Nukie90/SOA-Project/internal/config"
 	"github.com/Nukie90/SOA-Project/internal/db"
+	"log"
 
 	client "github.com/Nukie90/SOA-Project/api/services/client"
 
@@ -34,7 +34,7 @@ func ClientServer(name, value, usage string) error {
 
 	ClientServer.Use(cors.New(cors.Config{
 		AllowCredentials: true,
-		AllowOrigins:     "http://localhost:4000",
+		AllowOrigins:     "http://localhost:4000, http://localhost:5000",
 	}))
 
 	client.SetupClientRoute(ClientServer, db, configDetail)

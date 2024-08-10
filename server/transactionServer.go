@@ -3,10 +3,10 @@ package server
 import (
 	"flag"
 	"fmt"
-	"log"
 	"github.com/Nukie90/SOA-Project/api/services"
 	"github.com/Nukie90/SOA-Project/internal/config"
 	"github.com/Nukie90/SOA-Project/internal/db"
+	"log"
 
 	trans "github.com/Nukie90/SOA-Project/api/services/transaction"
 
@@ -34,7 +34,7 @@ func TransactionServer(name, value, usage string) error {
 
 	transactionServer.Use(cors.New(cors.Config{
 		AllowCredentials: true,
-		AllowOrigins:     "http://localhost:4000",
+		AllowOrigins:     "http://localhost:4000, http://localhost:5000",
 	}))
 
 	trans.SetupTransactionRoute(transactionServer, db, configDetail)
