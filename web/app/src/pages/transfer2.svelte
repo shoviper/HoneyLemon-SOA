@@ -1,16 +1,56 @@
 <script>
     import { Link, navigate } from "svelte-routing";
-    import { Card, Label, Button, Modal } from 'flowbite-svelte';
+    import { Card, Input, Label, Button, Modal } from 'flowbite-svelte';
     import { ExclamationCircleOutline } from 'flowbite-svelte-icons';
     import HoneyLemonLogo from '../assets/BankLogo.png';
     import CancelButton from '../assets/cancel.png';
     import ConfirmButton from '../assets/confirm.png';
     import BackButton from '../assets/back.png';
+    import { currentUser } from '../lib/userstore.js';
 
-    let popupModal = false;
+    let popupModal_confirm = false;
+    let popupModal_cancel = false;
+    let enteredPin = '';
+    let pinError = '';
+
+    // Get data from location state
+    const { receiverAccountNumber, amount } = history.state || {};
+
+    // Fetch currentUser from the store
+    let user;
+    currentUser.subscribe(value => {
+        user = value;
+    });
+
+    // Display the selected account number
+    const fromAccountNumber = user?.selectedAccount || 'N/A';
+    const userFullName = user?.fullname || 'N/A';
 
     function handleConfirmClick() {
-        navigate('/');
+        popupModal_confirm = true;
+    }
+
+    function handleCancelClick() {
+        popupModal_cancel = true;
+    }
+
+    function handleTransactionConfirm() {
+        const storedPin = user?.pin;
+
+        console.log('Entered PIN:', enteredPin);
+        console.log('Stored PIN:', storedPin);
+
+        if (enteredPin === storedPin) {
+            console.log('PIN is correct, navigating to /transfer3');
+            navigate('/transfer3', { state: { receiverAccountNumber, amount } });
+        } else {
+            pinError = "Incorrect PIN. Please try again.";
+            console.log('PIN is incorrect');
+        }
+    }
+
+    function handleTransactionCancel() {
+        navigate('/mainaccount');
     }
 </script>
 
@@ -27,17 +67,16 @@
             <span class="text-black text-xl">From:</span>
         </Label>
         <Label class="space-y-2 flex flex-col mt-8">
-            <span class="text-xl text-[#28A745]">Shogun</span>
-            <span class="text-base text-[#666666]">xxx-xxx-xxx</span>
+            <span class="text-xl text-[#28A745]">{userFullName}</span>
+            <span class="text-base text-[#666666]">{fromAccountNumber}</span>
         </Label>
     </div>
     <div class="flex items-center justify-between">
         <Label class="space-y-2">
             <span class="text-black text-xl">To:</span>
         </Label>
-        <Label class="space-y-2 flex flex-col mt-8">
-            <span class="text-xl text-[#28A745]">Bingo</span>
-            <span class="text-base text-[#666666]">xxx-xxx-xxx</span>
+        <Label class="space-y-2 flex flex-col">
+            <span class="text-base text-[#666666]">{receiverAccountNumber || 'N/A'}</span>
         </Label>
     </div>
     <div class="flex items-center justify-between">
@@ -45,7 +84,7 @@
             <span class="text-black text-xl">Amount:</span>
         </Label>
         <Label class="space-y-2">
-            <span class="text-black text-xl">100000.00</span>
+            <span class="text-black text-xl">{amount || 'N/A'}</span>
         </Label>
     </div>
     <div class="flex items-center justify-between">
@@ -56,25 +95,39 @@
     </div>
     <div class="flex items-center justify-between">
         <div class="flex items-center">
-            <img src="{CancelButton}" class="h-12 w-12 mt-7 cursor-pointer" alt="Cancel" on:click={() => (popupModal = true)} />
+            <img src="{CancelButton}" class="h-12 w-12 mt-7 cursor-pointer" alt="Cancel" on:click={handleCancelClick} />
             <span class="text-black ml-1 mt-7">Cancel</span>
         </div>
         <div class="flex items-center">
             <span class="text-black mr-1 mt-7">Confirm</span>
-            <Link to="/transfer3">
-                <img src="{ConfirmButton}" class="h-12 w-12 mt-7 cursor-pointer" alt="Confirm" />
-            </Link>
+            <img src="{ConfirmButton}" class="h-12 w-12 mt-7 cursor-pointer" alt="Confirm" on:click={handleConfirmClick} />
         </div>
-        <Modal bind:open={popupModal} size="xs" autoclose>
-            <div class="text-center">
-                <ExclamationCircleOutline class="mx-auto mb-4 text-gray-400 w-12 h-12" />
-                <h3 class="mb-5 text-lg font-normal text-gray-500">Are you sure you want to cancel?</h3>
-                <div class="flex justify-center gap-2">
-                    <Button color="red" on:click={handleConfirmClick}>Yes, I'm sure</Button>
-                    <Button color="alternative" on:click={() => (popupModal = false)}>No, cancel</Button>
-                </div>
-            </div>
-        </Modal>
     </div>
+    <Modal bind:open={popupModal_cancel} size="xs" autoclose>
+        <div class="text-center">
+            <ExclamationCircleOutline class="mx-auto mb-4 text-gray-400 w-12 h-12" />
+            <h3 class="mb-5 text-lg font-normal text-gray-500">Are you sure you want to cancel?</h3>
+            <div class="flex justify-center gap-2">
+                <Button color="red" on:click={handleTransactionCancel}>Yes, I'm sure</Button>
+                <Button color="alternative" on:click={() => (popupModal_cancel = false)}>No, cancel</Button>
+            </div>
+        </div>
+    </Modal>
+    <Modal bind:open={popupModal_confirm} size="xs" autoclose noCloseButton>
+        <form class="flex flex-col space-y-6" action="#">
+            <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Enter PIN to Confirm</h3>
+            <Label class="space-y-2">
+              <span>Enter your PIN</span>
+              <Input type="password" bind:value={enteredPin} required />
+            </Label>
+            {#if pinError}
+                <p class="text-red-500">{pinError}</p>
+            {/if}
+            <div class="flex justify-center gap-4">
+                <Button color="red" on:click={handleTransactionConfirm}>Enter</Button>
+                <Button color="alternative" on:click={() => (popupModal_confirm = false)}>Cancel</Button>
+            </div>
+        </form>
+    </Modal>
   </form>
 </Card>

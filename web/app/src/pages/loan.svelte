@@ -11,7 +11,7 @@
   <Card class="bg-white mt-24 mb-5" size="2xl" padding="lg" style="width: 1400px; height: 770px;">
     <div class="flex flex-col h-full">
         <div class="flex items-center justify-between">
-            <Link to="/">
+            <Link to="/mainaccount">
                 <img src="{BackButton}" class="h-4 w-4" alt="Back Button" />
             </Link>
             <img src="{HoneyLemonLogo}" class="h-18 w-28" alt="HoneyLemonLogo" />
@@ -150,14 +150,14 @@
         </div>
         <div class="flex items-center justify-between">
             <div class="flex items-center justify-between ml-4">
-                <Link to="/">
+                <Link to="/mainaccount">
                     <img src="{CancelButton}" class="h-10 w-10 mt-2 " alt="HoneyLemonLogo" />
                 </Link>
                 <span class="text-black ml-1 mt-2">Clear</span>
             </div>
             <div class="flex items-center justify-between mr-4">
                 <span class="text-black mr-1 mt-2">Confirm</span>
-                <Link to="/">
+                <Link to="/mainaccount">
                     <img src="{ConfirmButton}" class="h-10 w-10 mt-2" alt="HoneyLemonLogo" />
                 </Link>
             </div>

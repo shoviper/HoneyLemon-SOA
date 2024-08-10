@@ -50,7 +50,7 @@
             <span class="text-black text-xl ">10.00</span>
         </Label>
     </div>
-    <Link to="/">
+    <Link to="/mainaccount">
         <Button type="submit" class="w-full bg-[#218838] hover:bg-[#28A745]">
             Back to Account page
         </Button>

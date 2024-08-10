@@ -54,7 +54,7 @@
   <Card class="bg-white mt-24 mb-5" size="2xl" padding="lg" style="width: 1400px; height: 670px;">
     <div class="flex flex-col h-full">
       <div class="flex items-center justify-between">
-        <Link to="/">
+        <Link to="/mainaccount">
           <img src="{BackButton}" class="h-4 w-4" alt="Back Button" />
         </Link>
         <img src="{HoneyLemonLogo}" class="h-18 w-28" alt="HoneyLemonLogo" />

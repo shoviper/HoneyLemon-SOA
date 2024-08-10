@@ -21,7 +21,7 @@
     if (user) {
       currentUser.set(user);
       alert("Login successful");
-      navigate('/');
+      navigate('/mainaccount');
     } else {
       alert("Invalid ID card or password");
     }

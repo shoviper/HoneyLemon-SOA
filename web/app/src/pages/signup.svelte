@@ -6,68 +6,62 @@
 
   let localUsers = [];
 
-users.subscribe(value => {
-  localUsers = value;
-});
+  users.subscribe(value => {
+    localUsers = value;
+  });
 
-function signup(event) {
-  event.preventDefault();
+  function signup(event) {
+    event.preventDefault();
 
-  const idcard = event.target.idcard.value;
-  const fullname = event.target.fullname.value;
-  const birthdate = event.target.birthdate.value;
-  const address = event.target.address.value;
-  const email = event.target.email.value;
-  const password = event.target.password.value;
-  const confirmpassword = event.target.confirmpassword.value;
+    const idcard = event.target.idcard.value;
+    const fullname = event.target.fullname.value;
+    const birthdate = event.target.birthdate.value;
+    const address = event.target.address.value;
+    const email = event.target.email.value;
+    const password = event.target.password.value;
+    const confirmpassword = event.target.confirmpassword.value;
 
-  // Validate ID card length
-  if (idcard.length != 13) {
-    alert("ID card is not correct");
-    return;
+    // Validate ID card length
+    if (idcard.length != 13) {
+      alert("ID card is not correct");
+      return;
+    }
+
+    // Validate password and confirm password match
+    if (password !== confirmpassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
+    // Check if ID card is already in use
+    if (localUsers.some(user => user.idcard === idcard)) {
+      alert("This ID card has already registered");
+      return;
+    }
+
+    // Add new user
+    const newUser = {
+      idcard,
+      fullname,
+      birthdate,
+      address,
+      email,
+      password,
+      accounts: [] // Initialize with an empty accounts array
+    };
+    localUsers.push(newUser);
+
+    // Update the users store
+    users.set(localUsers);
+
+    // Set the currentUser store
+    currentUser.set(newUser);
+
+    alert("Sign up successful");
+
+    // Navigate to the appropriate page
+    navigate(newUser.accounts.length > 0 ? '/' : '/accountregister');
   }
-
-  // Validate password and confirm password match
-  if (password !== confirmpassword) {
-    alert("Passwords do not match");
-    return;
-  }
-
-  // Check if ID card is already in use
-  if (localUsers.some(user => user.idcard === idcard)) {
-    alert("This ID card has already registered");
-    return;
-  }
-
-  // Add new user
-  const newUser = {
-    idcard,
-    fullname,
-    birthdate,
-    address,
-    email,
-    password,
-    accountNumber: null // Default account number as null
-  };
-  localUsers.push(newUser);
-
-  // Update the users store
-  users.set(localUsers);
-
-  // Set the currentUser store
-  currentUser.set(newUser);
-
-  alert("Sign up successful");
-
-  // Check if the user already has an account registered
-  if (newUser.accountNumber) {
-    // If the account number exists, navigate to the account page
-    navigate('/');
-  } else {
-    // If no account number, navigate to account register page
-    navigate('/accountregister');
-  }
-}
 </script>
 
 <Card>

@@ -18,7 +18,7 @@
   <Card class="bg-white mb-5" size="md" padding="xl" style="width: 900px;">
     <div class="flex flex-col h-full">
         <div class="flex items-center justify-between">
-            <Link to="/">
+            <Link to="/mainaccount">
                 <img src="{BackButton}" class="h-4 w-4" alt="HoneyLemonLogo" />
             </Link>
             <img src="{HoneyLemonLogo}" class="h-18 w-28" alt="HoneyLemonLogo" />
@@ -27,22 +27,7 @@
             Request Statement
         </div>
         <div class="ml-4">
-            <Card class="bg-white border-black mb-5" size="md" padding="xl">
-                <div class="flex flex-col h-full">
-                    <div class="text-base text-black">
-                        Select channel
-                    </div>
-                    <div class="flex items-center space-x-4 mt-2">
-                        <Label class="inline-flex items-center">
-                        <input type="radio" name="channelway" value="HoneyLemon"  class="appearance-none h-4 w-4 border border-gray-300 rounded-full checked:bg-green-600 checked:border-transparent focus:outline-none transition duration-200" />
-                        <span class="ml-2 text-gray-700 dark:text-gray-300">HoneyLemon</span>
-                        </Label>
-                        <Label class="inline-flex items-center">
-                        <input type="radio" name="channelway" value="E-mail"  class="appearance-none h-4 w-4 border border-gray-300 rounded-full checked:bg-green-600 checked:border-transparent focus:outline-none transition duration-200" />
-                        <span class="ml-2 text-gray-700 dark:text-gray-300">E-mail</span>
-                        </Label>
-                    </div>
-                </div>
+            <Card class="bg-white border-black mb-5" size="md" padding="md">
                 <div class="flex flex-col h-full">
                     <div class="text-base text-black mt-2">
                         Start date

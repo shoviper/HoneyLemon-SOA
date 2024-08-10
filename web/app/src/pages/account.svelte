@@ -1,9 +1,10 @@
 <script>
-  import { currentUser } from '../lib/userstore.js';
+  import { Card, Button, Dropdown, DropdownItem } from 'flowbite-svelte';
   import { Link } from 'svelte-routing';
-  import { Card, Button } from 'flowbite-svelte';
   import { DotsVerticalOutline } from 'flowbite-svelte-icons';
-  import { Dropdown, DropdownItem } from 'flowbite-svelte';
+  import { currentUser, users } from '../lib/userstore.js';
+  import { onMount } from 'svelte';
+  import HoneyLemonLogo from '../assets/BankLogo.png';
   import Transfer from '../assets/Transfer.png';
   import Payment from '../assets/Pay.png';
   import Loan from '../assets/Loan.png';
@@ -11,11 +12,22 @@
   import Statement from '../assets/Statement.png';
 
   let user = null;
+  let localUsers = [];
 
-  // Subscribe to currentUser store
-  currentUser.subscribe(value => {
-    user = value;
+  onMount(() => {
+    users.subscribe(value => {
+      localUsers = value;
+    });
+
+    currentUser.subscribe(value => {
+      user = value;
+    });
   });
+
+  function switchAccount(accountNumber) {
+    user.selectedAccount = accountNumber;
+    currentUser.set(user);
+  }
 </script>
 
 <div class="flex flex-col items-center">
@@ -27,17 +39,22 @@
             {user ? user.fullname : 'Guest'}
           </h5>
           <h6 class="mb-3 font-normal text-base text-gray-700 dark:text-gray-400 leading-tight">
-            {user && user.accountNumber ? user.accountNumber : 'account number'}
+            {user && user.selectedAccount ? 
+              `${user.selectedAccount || 'xxxxx'}` 
+              : 'xxxxx'
+            }
           </h6>
         </div>
         <div class="flex items-center">
           <DotsVerticalOutline class="dots-menu dark:text-white cursor-pointer mb-10" />
-          <Dropdown triggeredBy=".dots-menu" class="bg-slate-50 rounded shadow-lg">
-            <DropdownItem class="bg-white hover:bg-slate-50">Account 1</DropdownItem>
-            <DropdownItem class="bg-white hover:bg-slate-50">Account 2</DropdownItem>
-            <DropdownItem class="bg-white hover:bg-slate-50">Account 3</DropdownItem>
-            <DropdownItem slot="footer" class="bg-white hover:bg-slate-50">
-              <Link to="/addaccount" class="w-full text-left block text-gray-700 dark:text-gray-400 hover:bg-slate-50">
+          <Dropdown triggeredBy=".dots-menu" class="bg-slate-100 rounded shadow-lg">
+            {#each user.accounts as account}
+              <DropdownItem class="bg-white hover:bg-slate-50" on:click={() => switchAccount(account.accountNumber)}>
+                {account.accountNumber}
+              </DropdownItem>
+            {/each}
+            <DropdownItem slot="footer" class="bg-[#28A745] hover:bg-[#03C04A]">
+              <Link to="/addaccount" class="w-full text-left block text-white dark:text-gray-400">
                 Add new account
               </Link>
             </DropdownItem>
@@ -48,7 +65,14 @@
         <div class="flex flex-col items-center mt-[-80px]">
           <div class="flex flex-col items-center justify-center w-60 h-60 bg-[#28A745] rounded-full border-2 border-gray-300">
             <span class="text-xl font-bold text-white block">Available Balance</span>
-            <span class="text-xl font-medium text-white block mt-4">฿1234.56</span>
+            <span class="text-xl font-medium text-white block mt-4">
+              {user && user.selectedAccount ? 
+                `${
+                  user.accounts.find(acc => acc.accountNumber === user.selectedAccount)?.balance || '10000'
+                }`
+                : '0'
+              }
+            </span>
           </div>
         </div>
       </div>

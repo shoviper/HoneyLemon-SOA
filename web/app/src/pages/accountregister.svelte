@@ -25,24 +25,24 @@
       return;
     }
 
-    if (accnumber.length != 9) {
-      alert("An account number must be in length of 9")
+    // Check if the user already has 5 accounts
+    if (user.accounts.length >= 5) {
+      alert("You cannot have more than 5 accounts.");
+      return;
     }
 
-    // Update the currentUser with account number
-    user.accountNumber = accnumber;
+    // Add new account with initial balance
+    user.accounts.push({ accountNumber: accnumber, balance: 10000.00 });
 
-    // Update the user in the users array
+    // Update the currentUser and users store
     const updatedUsers = localUsers.map(u => u.idcard === user.idcard ? user : u);
     users.set(updatedUsers);
-
-    // Update the currentUser store
     currentUser.set(user);
 
     alert("Account registration successful");
 
-    // Redirect to the account page
-    navigate('/');
+    // Navigate to set PIN page
+    navigate('/accountsetpin');
   }
 </script>
 

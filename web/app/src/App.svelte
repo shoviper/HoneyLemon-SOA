@@ -32,7 +32,7 @@
 </script>
 
 <Router>
-    <Route path="/index">
+    <Route path="/">
         <MainLayout>
             <Content />
         </MainLayout>
@@ -100,7 +100,7 @@
             <ResetPassword />
         </Login_Signup_Accregister_Layout>
     </Route>
-    <Route path="/">
+    <Route path="/mainaccount">
         <Account_Settings_MainLayout>
             <AccountLayout>
                 <Account />

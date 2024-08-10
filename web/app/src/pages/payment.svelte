@@ -8,17 +8,21 @@
     import NextButton from '../assets/next.png';
     import BackButton from '../assets/back.png';
 
-    let popupModal = false;
+    let popupModal_cancel = false;
 
-    function handleConfirmClick() {
-        navigate('/');
+    function handleCancelClick() {
+        popupModal_cancel = true;
+    }
+
+    function handleTransactionCancel() {
+        navigate('/mainaccount');
     }
 </script>
 
 <Card>
   <form class="flex flex-col space-y-6" action="/">
     <div class="flex items-center justify-between">
-        <Link to="/">
+        <Link to="/mainaccount">
             <img src="{BackButton}" class="h-4 w-4" alt="BackButton" />
         </Link>
         <img src="{HoneyLemonLogo}" class="h-18 w-28" alt="HoneyLemonLogo" />
@@ -36,7 +40,7 @@
     </Label>
     <div class="flex items-center justify-between">
         <div class="flex items-center justify-between">
-            <img src="{CancelButton}" class="h-12 w-12 mt-7 cursor-pointer" alt="Cancel" on:click={() => (popupModal = true)} />
+            <img src="{CancelButton}" class="h-12 w-12 mt-7 cursor-pointer" alt="Cancel" on:click={handleCancelClick} />
             <span class="text-black ml-1 mt-7">Cancel</span>
         </div>
         <div class="flex items-center justify-between">
@@ -45,16 +49,7 @@
                 <img src="{NextButton}" class="h-12 w-12 mt-7" alt="NextButton" />
             </Link>
         </div>
-        <Modal bind:open={popupModal} size="xs" autoclose>
-            <div class="text-center">
-                <ExclamationCircleOutline class="mx-auto mb-4 text-gray-400 w-12 h-12" />
-                <h3 class="mb-5 text-lg font-normal text-gray-500">Are you sure you want to cancel?</h3>
-                <div class="flex justify-center gap-2">
-                    <Button color="red" on:click={handleConfirmClick}>Yes, I'm sure</Button>
-                    <Button color="alternative" on:click={() => (popupModal = false)}>No, cancel</Button>
-                </div>
-            </div>
-        </Modal>
+        
     </div>
   </form>
 </Card>
