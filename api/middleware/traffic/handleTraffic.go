@@ -102,8 +102,8 @@ func CheckLoginClient(ctx *fiber.Ctx) error {
 	ctx.Cookie(&fiber.Cookie{
 		Name:     "esb_token",
 		Value:    loginResponse.Token,
-		SameSite: "None",
-		HTTPOnly: true,
+		SameSite: "Lax", // For testing, you might try "Lax" instead of "None"
+		HTTPOnly: false,
 		Secure:   true,
 		Expires:  time.Now().Add(24 * time.Hour),
 	})
