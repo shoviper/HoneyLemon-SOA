@@ -102,7 +102,7 @@ func CheckLoginClient(ctx *fiber.Ctx) error {
 	ctx.Cookie(&fiber.Cookie{
 		Name:     "esb_token",
 		Value:    loginResponse.Token,
-		SameSite: "Lax", // For testing, you might try "Lax" instead of "None"
+		SameSite: "None",
 		HTTPOnly: false,
 		Secure:   true,
 		Expires:  time.Now().Add(24 * time.Hour),
@@ -128,9 +128,14 @@ func DoLogout(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to read response from second service")
 	}
 
-	if res.StatusCode == http.StatusOK {
-		ctx.ClearCookie("esb_token")
+	cookie := &fiber.Cookie{
+		Name:     "esb_token",
+		Value:    "",
+		Expires:  time.Now().Add(-24 * time.Hour),
+		SameSite: "None",
 	}
+
+	ctx.Cookie(cookie)
 
 	// Send the response from the second service back to the client
 	return ctx.Status(res.StatusCode).SendString(string(body))

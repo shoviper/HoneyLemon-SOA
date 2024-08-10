@@ -7,6 +7,7 @@
   import AccountLogo from "../assets/AccountLogo.png";
   import { Button, Dropdown, DropdownItem, Avatar, DropdownHeader, DropdownDivider } from 'flowbite-svelte';
   import { BellSolid, EyeSolid } from 'flowbite-svelte-icons';
+  import axios from 'axios';
 
   let popupModal = false;
 
@@ -17,10 +18,25 @@
     user = value;
   });
 
-  function handleLogout() {
-    currentUser.set(null);
-    localStorage.removeItem('currentUser'); // Clear user from localStorage
-    navigate('/'); // Redirect to login page
+  async function handleLogout() {
+    try {
+      const response = await axios.get("http://localhost:4000/esb/logout", {
+        withCredentials: true, // Include cookies with the request
+      });
+
+      // Clear the token cookie
+      document.cookie =
+        "esb_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+
+      if (response.status === 200) {
+        console.log("Logout successful:", response.data);
+        navigate("/");
+      } else {
+        console.error("Logout failed:", response.status);
+      }
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   }
 </script>
 
@@ -59,7 +75,7 @@
           Sign out
         </div>
       </DropdownItem>
-      <Modal bind:open={popupModal} size="xs" autoclose noCloseButton>
+      <Modal bind:open={popupModal} size="xs" autoclose>
         <div class="text-center">
           <ExclamationCircleOutline class="mx-auto mb-4 text-gray-400 w-12 h-12" />
           <h3 class="mb-5 text-lg font-normal text-gray-500">Are you sure you want to sign out?</h3>

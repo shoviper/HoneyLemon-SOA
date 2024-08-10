@@ -3,6 +3,26 @@
   import { Card, Button, Label, Input } from "flowbite-svelte";
   import HoneyLemonLogo from "../assets/BankLogo.png";
   import axios from "axios";
+  import { onMount } from "svelte";
+
+  let loggedIn = false; // Default state for logged in status
+
+  function checkLoginStatus() {
+    // Check for the presence of a specific cookie
+    const cookies = document.cookie.split(";").map((cookie) => cookie.trim());
+    const authCookie = cookies.find((cookie) =>
+      cookie.startsWith("esb_token=")
+    );
+
+    loggedIn = !!authCookie;
+  }
+
+  onMount(() => {
+    checkLoginStatus();
+    if (loggedIn) {
+      navigate("/mainaccount");
+    }
+  });
 
   let idcard = "";
   let password = "";

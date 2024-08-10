@@ -3,7 +3,26 @@
   import { navigate } from 'svelte-routing';
   import { Card, Button, Label, Input } from 'flowbite-svelte';
   import HoneyLemonLogo from '../assets/BankLogo.png';
+  import { onMount } from "svelte";
 
+  let loggedIn = false; // Default state for logged in status
+
+  function checkLoginStatus() {
+    // Check for the presence of a specific cookie
+    const cookies = document.cookie.split(";").map((cookie) => cookie.trim());
+    const authCookie = cookies.find((cookie) =>
+      cookie.startsWith("esb_token=")
+    );
+
+    loggedIn = !!authCookie;
+  }
+
+  onMount(() => {
+    checkLoginStatus();
+    if (loggedIn) {
+      navigate("/mainaccount");
+    }
+  });
   let localUsers = [];
 
   users.subscribe(value => {
