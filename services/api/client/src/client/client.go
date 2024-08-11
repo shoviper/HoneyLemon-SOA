@@ -146,6 +146,29 @@ func (cs *ClientService) LoginClient(ctx *fiber.Ctx) error {
 	})
 }
 
+func (cs *ClientService) GetClientInfo(ctx *fiber.Ctx) error {
+	clientID := ctx.Locals("userID").(string)
+
+	var clientDB entities.Client
+	if err := cs.clientDB.Where("id = ?", clientID).First(&clientDB).Error; err != nil {
+		return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": err.Error(),
+			"message": "Client not found",
+		})
+	}
+
+	birthdayStr := clientDB.BirthDate.Format("2006-01-02")
+
+	clientInfo := models.ClientInfo{
+		ID:        clientDB.ID,
+		Name:      clientDB.Name,
+		Address:   clientDB.Address,
+		BirthDate: birthdayStr,
+	}
+
+	return ctx.Status(200).JSON(clientInfo)
+}
+
 func (cs *ClientService) DeleteClient(ctx *fiber.Ctx) error {
 	var client models.DeleteClient
 	if err := ctx.BodyParser(&client); err != nil {
