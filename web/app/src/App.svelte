@@ -24,6 +24,7 @@
     import InvestmentBuy from "./pages/investmentbuy.svelte";
     import InvestmentSell from "./pages/investmentsell.svelte";
     import Statement from "./pages/statement.svelte";
+    import Statement2 from "./pages/statement2.svelte";
 
     import MainLayout from "./layouts/mainlayout.svelte";
     import AccountLayout from "./layouts/accountlayout.svelte";
@@ -181,6 +182,13 @@
         <Account_Settings_MainLayout>
             <AccountLayout>
                 <Statement />
+            </AccountLayout>
+        </Account_Settings_MainLayout>
+    </Route>
+    <Route path="/statement2">
+        <Account_Settings_MainLayout>
+            <AccountLayout>
+                <Statement2 />
             </AccountLayout>
         </Account_Settings_MainLayout>
     </Route>

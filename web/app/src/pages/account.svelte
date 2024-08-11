@@ -1,19 +1,22 @@
 <script>
-  import { Card, Button, Dropdown, DropdownItem } from "flowbite-svelte";
-  import { Link, navigate } from "svelte-routing";
-  import { DotsVerticalOutline } from "flowbite-svelte-icons";
-  import { currentUser, users } from "../lib/userstore.js";
-  import { onMount } from "svelte";
-  import HoneyLemonLogo from "../assets/BankLogo.png";
-  import Transfer from "../assets/Transfer.png";
-  import Payment from "../assets/Pay.png";
-  import Loan from "../assets/Loan.png";
-  import Investment from "../assets/Invest.png";
-  import Statement from "../assets/Statement.png";
+  import { Card,Input, Label, Modal, Button, Dropdown, DropdownItem } from 'flowbite-svelte';
+  import { Link, navigate } from 'svelte-routing';
+  import { DotsVerticalOutline } from 'flowbite-svelte-icons';
+  import { currentUser, users } from '../lib/userstore.js';
+  import { onMount } from 'svelte';
+  import HoneyLemonLogo from '../assets/BankLogo.png';
+  import Transfer from '../assets/Transfer.png';
+  import Payment from '../assets/Pay.png';
+  import Loan from '../assets/Loan.png';
+  import Investment from '../assets/Invest.png';
+  import Statement from '../assets/Statement.png';
   import axios from "axios";
+
 
   let user = null;
   let localUsers = [];
+  let enteredPin = '';
+  let pinError = '';
   let userData = null;
   let accountData = null;
   let selectedAccount = null;
@@ -101,6 +104,27 @@
   function switchAccount(accountNumber) {
     selectedAccount = accountData.find((account) => account.id === accountNumber);
   }
+
+  let popupModal_deleteacc = false;
+
+  function handleDeleteAcc() {
+    popupModal_deleteacc = true;
+  }
+
+  function handleTransactionConfirm() {
+      const storedPin = user?.pin;
+
+      console.log('Entered PIN:', enteredPin);
+      console.log('Stored PIN:', storedPin);
+
+      if (enteredPin === storedPin) {
+          console.log('PIN is correct, navigating to /transfer3');
+          navigate('/transfer3', { state: { receiverAccountNumber, amount } });
+      } else {
+          pinError = "Incorrect PIN. Please try again.";
+          console.log('PIN is incorrect');
+      }
+  }
 </script>
 <div class="flex flex-col items-center">
   <Card class="bg-white mb-5" size="lg" padding="xl" style="width: 900px;">
@@ -168,6 +192,32 @@
             </span>
           </div>
         </div>
+      </div>
+      <div class="flex flex-1 items-center justify-between">
+      <div>
+        <Link to="/changepin">
+          <Button class="w-40 h-9 bg-[#cccccc] hover:bg-slate-100 text-black flex items-center justify-center space-x-2">Change pin</Button>
+        </Link>
+      </div>
+      <div>
+        <Button class="w-40 h-9 bg-red-400 hover:bg-red-700 text-black flex items-center justify-center space-x-2" on:click={handleDeleteAcc}>Delete Account</Button>
+      </div>
+      <Modal bind:open={popupModal_deleteacc} size="xs" autoclose noCloseButton>
+        <form class="flex flex-col space-y-6" action="#">
+            <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Enter PIN to Confirm</h3>
+            <Label class="space-y-2">
+              <span>Enter your PIN</span>
+              <Input type="password" bind:value={enteredPin} required />
+            </Label>
+            {#if pinError}
+                <p class="text-red-500">{pinError}</p>
+            {/if}
+            <div class="flex justify-center gap-4">
+                <Button color="red" on:click={handleTransactionConfirm}>Enter</Button>
+                <Button color="alternative" on:click={() => (popupModal_deleteacc = false)}>Cancel</Button>
+            </div>
+        </form>
+    </Modal>
       </div>
     </div>
   </Card>
