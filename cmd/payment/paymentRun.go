@@ -1,9 +1,9 @@
-package main
+package payment
 
 import (
-	"github.com/Nukie90/SOA-Project/server"
+	_"github.com/Nukie90/SOA-Project/server"
 )
 
-func main() {
-	server.PaymentServer("env", "dev", "a string")
+func Runner() {
+	// server.PaymentServer("env", "dev", "a string")
 }

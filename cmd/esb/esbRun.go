@@ -1,9 +1,9 @@
-package main
+package esb
 
 import (
-	"github.com/Nukie90/SOA-Project/server"
+	// "github.com/Nukie90/SOA-Project/server"
 )
 
-func main() {
-	server.ESBServer("env", "dev", "a string")
+func Runner() {
+	// server.ESBServer("env", "dev", "a string")
 }

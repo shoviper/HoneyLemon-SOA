@@ -9,6 +9,10 @@ import (
 func SetupClientRoute(app *fiber.App, db *gorm.DB, vp *viper.Viper) {
 	cs := NewClientService(db, vp)
 
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.SendString("Hello, World!")
+	})
+
 	api := app.Group("/api")
 	{
 		v1 := api.Group("/v1")

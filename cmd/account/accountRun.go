@@ -1,9 +1,9 @@
-package main
+package account
 
 import (
-	"github.com/Nukie90/SOA-Project/server"
+	_"github.com/Nukie90/SOA-Project/server"
 )
 
-func main() {
-	server.AccountServer("env", "dev", "a string")
+func Runner() {
+	// server.AccountServer("env", "dev", "a string")
 }

@@ -1,9 +1,9 @@
-package main
+package statement
 
 import (
-	"github.com/Nukie90/SOA-Project/server"
+	_"github.com/Nukie90/SOA-Project/server"
 )
 
-func main() {
-	server.StatementServer("env", "dev", "a string")
+func Runner() {
+	// server.StatementServer("env", "dev", "a string")
 }

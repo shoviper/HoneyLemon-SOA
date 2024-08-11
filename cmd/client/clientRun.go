@@ -1,9 +1,9 @@
-package main
+package client
 
 import (
-	"github.com/Nukie90/SOA-Project/server"
+	_"github.com/Nukie90/SOA-Project/server"
 )
 
-func main() {
-	server.ClientServer("env", "dev", "a string")
+func Runner() {
+	// server.ClientServer("env", "dev", "a string")
 }

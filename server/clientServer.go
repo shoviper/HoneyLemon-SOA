@@ -1,7 +1,7 @@
 package server
 
 import (
-	"flag"
+	_"flag"
 	"fmt"
 	"log"
 	"github.com/Nukie90/SOA-Project/api/services"
@@ -14,12 +14,12 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
-func ClientServer(name, value, usage string) error {
-	envFlag := flag.String(name, value, usage)
+func ClientServer(env string) error {
+	// envFlag := flag.String(name, value, usage)
 
-	flag.Parse()
+	// flag.Parse()
 
-	configDetail, err := config.LoadConfig(*envFlag)
+	configDetail, err := config.LoadConfig(env)
 	if err != nil {
 		log.Fatalf("Error loading config: %v", err)
 	}

@@ -1,9 +1,9 @@
-package main
+package transaction
 
 import (
-	"github.com/Nukie90/SOA-Project/server"
+	_"github.com/Nukie90/SOA-Project/server"
 )
 
-func main() {
-	server.TransactionServer("env", "dev", "a string")
+func Runner() {
+	// server.TransactionServer("env", "dev", "a string")
 }

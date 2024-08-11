@@ -1,7 +1,6 @@
 package server
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"github.com/Nukie90/SOA-Project/api/services"
@@ -13,12 +12,9 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
-func ESBServer(name, value, usage string) error {
-	envFlag := flag.String(name, value, usage)
+func ESBServer(env string) error {
 
-	flag.Parse()
-
-	configDetail, err := config.LoadConfig(*envFlag)
+	configDetail, err := config.LoadConfig(env)
 	if err != nil {
 		log.Fatalf("Error loading config: %v", err)
 	}
