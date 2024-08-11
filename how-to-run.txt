@@ -1,27 +1,11 @@
 After pull
 
+cd services
+
 go mod tidy
 
-then
+run containers:
+docker-compose up
 
-go run main.go -env=pgsql
-
-run esb server:
-go run cmd/esb/esbRun.go -env=pgsql
-
-run client server:
-go run cmd/client/clientRun.go -env=pgsql
-
-run account server:
-go run cmd/account/accountRun.go -env=pgsql 
-
-run transaction server:
-go run cmd/transaction/transactionRun.go -env=pgsql
-
-run payment server:
-go run cmd/payment/paymentRun.go -env=pgsql
-
-run statement server:
-go run cmd/statement/statementRun.go -env=pgsql
-
-pgsql.yaml provide in our discord
+build containers + run containers:
+docker-compose up --build
