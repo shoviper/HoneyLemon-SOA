@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/Nukie90/SOA-Project/internal/db/models"
@@ -112,6 +113,42 @@ func CheckLoginClient(ctx *fiber.Ctx) error {
 		"message": "Response from second service",
 		"token":   loginResponse.Token,
 	})
+}
+
+func GetClientInfo(ctx *fiber.Ctx) error {
+	// Get the token from the Authorization header
+	authHeader := ctx.Get("esb_token")
+	fmt.Println("clinet "+authHeader)
+	if authHeader == "" {
+		return ctx.Status(fiber.StatusUnauthorized).SendString("Authorization header is missing")
+	}
+
+	// Extract the token from the Authorization header
+	token := strings.TrimPrefix(authHeader, "Bearer ")
+	if token == authHeader { // No "Bearer " prefix found
+		return ctx.Status(fiber.StatusUnauthorized).SendString("Invalid authorization format")
+	}
+
+	req, err := http.NewRequest("GET", "http://localhost:3001/api/v1/authclients/info", nil)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to create request to second service")
+	}
+
+	req.Header.Set("cookie", "esb_token= "+token)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to make request to second service")
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to read response from second service")
+	}
+
+	return ctx.Status(resp.StatusCode).SendString(string(body))
 }
 
 func DoLogout(ctx *fiber.Ctx) error {
@@ -279,14 +316,26 @@ func GetAccount(ctx *fiber.Ctx) error {
 }
 
 func GetAllClientAccounts(ctx *fiber.Ctx) error {
-	cookie := ctx.Cookies("esb_token")
-	//set header from cookie
+	// Get the token from the Authorization header
+	authHeader := ctx.Get("esb_token")
+	fmt.Println(authHeader)
+	if authHeader == "" {
+		return ctx.Status(fiber.StatusUnauthorized).SendString("Authorization header is missing")
+	}
+
+	// Extract the token from the Authorization header
+	token := strings.TrimPrefix(authHeader, "Bearer ")
+	fmt.Println(token)
+	if token == authHeader { // No "Bearer " prefix found
+		return ctx.Status(fiber.StatusUnauthorized).SendString("Invalid authorization format")
+	}
+
 	req, err := http.NewRequest("GET", "http://localhost:3002/api/v1/accounts/clientAcc", nil)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to create request to second service")
 	}
 
-	req.Header.Set("Cookie", "esb_token="+cookie)
+	req.Header.Set("cookie", "esb_token= "+token)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -295,13 +344,11 @@ func GetAllClientAccounts(ctx *fiber.Ctx) error {
 	}
 	defer resp.Body.Close()
 
-	// Read the response body from the second service
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to read response from second service")
 	}
 
-	// Send the response from the second service back to the client
 	return ctx.Status(resp.StatusCode).SendString(string(body))
 }
 
