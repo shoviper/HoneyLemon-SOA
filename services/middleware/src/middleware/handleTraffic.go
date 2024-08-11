@@ -123,7 +123,7 @@ func CheckLoginClient(ctx *fiber.Ctx) error {
 func GetClientInfo(ctx *fiber.Ctx) error {
 	// Get the token from the Authorization header
 	authHeader := ctx.Get("esb_token")
-	fmt.Println("clinet "+authHeader)
+	fmt.Println("clinet " + authHeader)
 	if authHeader == "" {
 		return ctx.Status(fiber.StatusUnauthorized).SendString("Authorization header is missing")
 	}
@@ -155,7 +155,6 @@ func GetClientInfo(ctx *fiber.Ctx) error {
 
 	return ctx.Status(resp.StatusCode).SendString(string(body))
 }
-
 
 func DoLogout(ctx *fiber.Ctx) error {
 	res, err := http.Get("http://client-services:3001/api/v1/clients/logout")
@@ -343,6 +342,82 @@ func GetAllClientAccounts(ctx *fiber.Ctx) error {
 	return ctx.Status(resp.StatusCode).SendString(string(body))
 }
 
+func GetAccountByID(ctx *fiber.Ctx) error {
+	accountID := ctx.Params("id")
+	cookie := ctx.Cookies("esb_token")
+
+	// Ensure the accountID is provided
+	if accountID == "" {
+		return ctx.Status(fiber.StatusBadRequest).SendString("accountID is required")
+	}
+
+	// Create a request to the account service
+	req, err := http.NewRequest("GET", "http://account-services:3002/api/v1/accounts/account/"+accountID, nil)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to create request to account service: " + err.Error())
+	}
+
+	// Set the necessary headers
+	req.Header.Set("Cookie", "esb_token="+cookie)
+
+	// Perform the request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to make request to account service: " + err.Error())
+	}
+	defer resp.Body.Close()
+
+	// Read and return the response from the account service
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to read response from account service: " + err.Error())
+	}
+
+	return ctx.Status(resp.StatusCode).SendString(string(body))
+}
+
+func VerifyPin(ctx *fiber.Ctx) error {
+	cookie := ctx.Cookies("esb_token")
+	requestBody := ctx.Body()
+
+	// Check if the request body is empty
+	if len(requestBody) == 0 {
+		return ctx.Status(fiber.StatusBadRequest).SendString("Request body is empty")
+	}
+
+	// Ensure the request body is valid JSON
+	if !json.Valid(requestBody) {
+		return ctx.Status(fiber.StatusBadRequest).SendString("Request body is not valid JSON")
+	}
+
+	// Create a request to the account service
+	req, err := http.NewRequest("POST", "http://account-services:3002/api/v1/accounts/verifyPin", bytes.NewBuffer(requestBody))
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to create request to account service: " + err.Error())
+	}
+
+	// Set the necessary headers
+	req.Header.Set("Cookie", "esb_token="+cookie)
+	req.Header.Set("Content-Type", "application/json")
+
+	// Perform the request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to make request to account service: " + err.Error())
+	}
+	defer resp.Body.Close()
+
+	// Read and return the response from the account service
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to read response from account service: " + err.Error())
+	}
+
+	return ctx.Status(resp.StatusCode).SendString(string(body))
+}
+
 func ChangePin(ctx *fiber.Ctx) error {
 	fmt.Println("Change pin")
 	cookie := ctx.Cookies("esb_token")
@@ -353,7 +428,7 @@ func ChangePin(ctx *fiber.Ctx) error {
 	if len(requestBody) == 0 {
 		return ctx.Status(fiber.StatusBadRequest).SendString("Request body is empty")
 	}
-fmt.Println(bytes.NewBuffer(requestBody))
+	fmt.Println(bytes.NewBuffer(requestBody))
 
 	//check if the request body is valid JSON
 	if !json.Valid(requestBody) {

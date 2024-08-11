@@ -17,3 +17,5 @@ users.subscribe(value => {
 currentUser.subscribe(value => {
   localStorage.setItem('currentUser', JSON.stringify(value));
 });
+
+export const currentAccount = writable(null);

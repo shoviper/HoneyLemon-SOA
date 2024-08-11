@@ -34,6 +34,8 @@ func ESBRoute(app *fiber.App) {
 			account.Get("/clientAcc", GetAllClientAccounts)
 			account.Patch("/update", ChangePin)
 			account.Delete("/delete", DeleteAccount)
+			account.Get("/account/:id", GetAccountByID)
+			account.Post("/verifyPin", VerifyPin)
 		}
 
 		transaction := esb.Group("/transactions")

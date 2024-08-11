@@ -249,3 +249,66 @@ func (as *AccountService) DeleteAccount(ctx *fiber.Ctx) error {
 		"message": "Account deleted successfully",
 	})
 }
+
+func (as *AccountService) GetAccountByID(ctx *fiber.Ctx) error {
+	type response struct {
+		AccountID string  `json:"accountID"`
+		ClientID  string  `json:"clientID"`
+		Type      string  `json:"type"`
+		Balance   float64 `json:"balance"`
+	}
+
+	fmt.Println("Get account by ID")
+	accountID := ctx.Params("id")
+
+	var accountInfo entities.Account
+	if err := as.accountDB.Where("id = ?", accountID).First(&accountInfo).Error; err != nil {
+		return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error":   err.Error(),
+			"message": "Account not found",
+		})
+	}
+
+	accountDetails := response{
+		AccountID: accountInfo.ID,
+		ClientID:  accountInfo.ClientID,
+		Type:      accountInfo.Type,
+		Balance:   accountInfo.Balance,
+	}
+
+	return ctx.Status(200).JSON(accountDetails)
+}
+
+func (as *AccountService) VerifyPin(ctx *fiber.Ctx) error {
+	var pinVerify struct {
+		AccountID string `json:"accountID"`
+		Pin       string `json:"pin"`
+	}
+
+	// Parse the request body
+	if err := ctx.BodyParser(&pinVerify); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   err.Error(),
+			"message": "Invalid request body",
+		})
+	}
+
+	var accountInfo entities.Account
+	if err := as.accountDB.Where("id = ?", pinVerify.AccountID).First(&accountInfo).Error; err != nil {
+		return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error":   err.Error(),
+			"message": "Account not found",
+		})
+	}
+
+	// Verify the provided PIN
+	if !local.CheckPasswordHash(pinVerify.Pin, accountInfo.Pin) {
+		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"message": "Invalid PIN",
+		})
+	}
+
+	return ctx.Status(200).JSON(fiber.Map{
+		"message": "PIN verified successfully",
+	})
+}

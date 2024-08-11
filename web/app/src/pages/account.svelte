@@ -10,7 +10,7 @@
   } from "flowbite-svelte";
   import { Link, navigate } from "svelte-routing";
   import { DotsVerticalOutline } from "flowbite-svelte-icons";
-  import { currentUser } from "../lib/userstore.js";
+  import { currentUser, users, currentAccount } from "../lib/userstore.js";
   import { onMount } from "svelte";
   import HoneyLemonLogo from "../assets/BankLogo.png";
   import Transfer from "../assets/Transfer.png";
@@ -19,6 +19,7 @@
   import Investment from "../assets/Invest.png";
   import Statement from "../assets/Statement.png";
   import axios from "axios";
+  import { get } from "svelte/store";
 
   let user = null;
   let enteredPin = "";
@@ -26,8 +27,6 @@
   let accountData = null;
   let selectedAccount = null;
   let loggedIn = false; // Default state for logged in status
-  let receiverAccountNumber = "";
-  let amount = 0;
 
   function checkLoginStatus() {
     // Check for the presence of a specific cookie
@@ -95,8 +94,10 @@
       );
 
       accountData = accResponse.data;
+      // console.log('accountData:', accountData);
 
       userData = userResponse.data;
+      // console.log('userData:', userData);
 
       selectedAccount = accountData.length > 0 ? accountData[0] : null;
       console.log("Selected account:", selectedAccount);
@@ -106,9 +107,11 @@
   }
 
   function switchAccount(accountNumber) {
-    selectedAccount = accountData.find(
-      (account) => account.id === accountNumber
-    );
+    selectedAccount = accountData.find((account) => account.id === accountNumber);
+    console.log("switchAccout called: " + selectedAccount.id);
+    
+    currentAccount.set(selectedAccount.id);
+    console.log("currentAccount: " + get(currentAccount));
   }
 
   let popupModal_deleteacc = false;
@@ -156,8 +159,9 @@
       <div class="flex items-center justify-between mb-4">
         <div class="flex flex-col">
           <h5
-            class="text-[#004D00] mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white"
+            class="text-[#004D00] mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
           >
+            <!-- get name from localstorage -->
             {#if userData}
               {userData.name}
             {/if}
@@ -174,10 +178,7 @@
           <DotsVerticalOutline
             class="dots-menu dark:text-white cursor-pointer mb-10"
           />
-          <Dropdown
-            triggeredBy=".dots-menu"
-            class="bg-slate-100 rounded shadow-lg"
-          >
+          <Dropdown triggeredBy=".dots-menu" class="bg-slate-100 rounded shadow-lg">
             {#if accountData && accountData.length > 0}
               {#each accountData as account}
                 <DropdownItem
