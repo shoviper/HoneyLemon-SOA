@@ -96,11 +96,6 @@
         Edit profile
         </Link>
       </DropdownItem>
-      <DropdownItem class="bg-white hover:bg-slate-50 px-4 py-2 text-gray-700">
-        <Link to="/changepin" class="w-full text-left block text-gray-700 dark:text-gray-400 hover:bg-slate-50">
-        Change pin
-        </Link>
-      </DropdownItem>
       <DropdownDivider class="my-2 border-t border-gray-300" />
       <DropdownItem class="bg-white hover:bg-slate-50 px-4 py-2 text-gray-700">
         <div class="w-full text-left block text-gray-700 dark:text-gray-400 hover:bg-slate-50" on:click={()=>

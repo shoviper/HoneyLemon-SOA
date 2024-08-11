@@ -40,8 +40,12 @@
   }
 
   function goToChangePin() {
-  navigate(`/changepin?accountId=${selectedAccount.id}`);
-}
+    if (!selectedAccount) {
+      alert("You have no account");
+      return;
+    }
+    navigate(`/changepin?accountId=${selectedAccount.id}`);
+  }
 
   onMount(() => {
     checkLoginStatus();
@@ -115,6 +119,11 @@
 
   function handleDeleteAccConfirm(event) {
     event.preventDefault(); // Prevent default form submission
+
+    if (!selectedAccount) {
+      alert("No account selected.");
+      return;
+    }
 
     if (!enteredPin) {
       alert("Please enter your PIN.");

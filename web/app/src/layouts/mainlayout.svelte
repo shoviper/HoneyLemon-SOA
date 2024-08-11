@@ -28,7 +28,9 @@
 >
   <div class="flex flex-row items-center">
     <div class="ml-1 mr-5">
-      <img src={HoneyLemonLogo} class="h-9" alt="HoneyLemonLogo" />
+      <Link to="/">
+        <img src={HoneyLemonLogo} class="h-9" alt="HoneyLemonLogo" />
+      </Link>
     </div>
   </div>
   <div class="flex space-x-3 items-center">
