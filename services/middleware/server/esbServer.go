@@ -23,7 +23,7 @@ func ESBServer(env string) error {
 
 	ESBServer.Use(cors.New(cors.Config{
 		AllowCredentials: true,
-		AllowOrigins:     "http://client-services:3001, http://account-services:3002, http://transaction-services:3003, http://payment-services:3004, http://statement-services:3005",
+		AllowOrigins:     "http://client-services:3001, http://account-services:3002, http://transaction-services:3003, http://payment-services:3004, http://statement-services:3005, http://127.0.0.1:5000",
 	}))
 
 	middleware.ESBRoute(ESBServer)
