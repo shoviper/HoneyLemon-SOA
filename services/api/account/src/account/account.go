@@ -157,11 +157,7 @@ func (as *AccountService) GetAllClientAccounts(ctx *fiber.Ctx) error {
 }
 
 func (as *AccountService) ChangePin(ctx *fiber.Ctx) error {
-	var pinChange struct {
-		AccountID string `json:"accountID"`
-		OldPin    string `json:"oldPin"`
-		NewPin    string `json:"newPin"`
-	}
+	var pinChange models.ChangePin
 
 	// Parse the request body
 	if err := ctx.BodyParser(&pinChange); err != nil {
@@ -175,7 +171,7 @@ func (as *AccountService) ChangePin(ctx *fiber.Ctx) error {
 	userID := ctx.Locals("userID")
 
 	var accountInfo entities.Account
-	if err := as.accountDB.Where("id = ? AND client_id = ?", pinChange.AccountID, userID).First(&accountInfo).Error; err != nil {
+	if err := as.accountDB.Where("id = ? AND client_id = ?", pinChange.ID, userID).First(&accountInfo).Error; err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   err.Error(),
 			"message": "Failed to retrieve account information",
@@ -213,10 +209,7 @@ func (as *AccountService) ChangePin(ctx *fiber.Ctx) error {
 }
 
 func (as *AccountService) DeleteAccount(ctx *fiber.Ctx) error {
-	var delAccount struct {
-		AccountID string `json:"accountID"`
-		Pin       string `json:"pin"`
-	}
+	var delAccount models.DeleteAccount
 
 	// Parse the request body
 	if err := ctx.BodyParser(&delAccount); err != nil {
@@ -230,7 +223,7 @@ func (as *AccountService) DeleteAccount(ctx *fiber.Ctx) error {
 	userID := ctx.Locals("userID")
 
 	var accountInfo entities.Account
-	if err := as.accountDB.Where("id = ? AND client_id = ?", delAccount.AccountID, userID).First(&accountInfo).Error; err != nil {
+	if err := as.accountDB.Where("id = ? AND client_id = ?", delAccount.ID, userID).First(&accountInfo).Error; err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":   err.Error(),
 			"message": "Failed to retrieve account information",

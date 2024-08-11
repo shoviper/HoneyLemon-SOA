@@ -2,55 +2,82 @@
   import { users, currentUser } from '../lib/userstore.js';
   import { navigate } from 'svelte-routing';
   import { Card, Button, Label, Input, Select } from 'flowbite-svelte';
-  import HoneyLemonLogo from "../assets/BankLogo.png";
+  import { onMount } from 'svelte';
+  import axios from 'axios';
 
-  let user = null;
-  let localUsers = [];
+  let loggedIn = false; // Default state for logged in status
 
-  users.subscribe(value => {
-    localUsers = value;
+  function checkLoginStatus() {
+    // Check for the presence of a specific cookie
+    const cookies = document.cookie.split(";").map((cookie) => cookie.trim());
+    const authCookie = cookies.find((cookie) =>
+      cookie.startsWith("esb_token=")
+    );
+
+    loggedIn = !!authCookie;
+  }
+
+  onMount(() => {
+    checkLoginStatus();
+    if (!loggedIn) {
+      navigate("/");
+    }
   });
 
-  currentUser.subscribe(value => {
-    user = value;
-  });
+  let pin = "";
+  let confirmpin = "";
 
-  function addNewAccount(event) {
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(";").shift();
+  }
+
+  function registerAccount(event) {
     event.preventDefault();
 
-    const accnumber = event.target.accnumber.value;
-    const fileaccbook = event.target.fileaccbook.files[0];
+    let token = getCookie("esb_token");
+    console.log("token", token);
 
-    if (!accnumber || !fileaccbook) {
-      alert("Please fill in all required fields.");
+    // Validate pin length
+    if (pin.length != 6) {
+      alert("Pin must be 6 digits");
       return;
     }
 
-    // Check if the user already has 5 accounts
-    if (user.accounts.length >= 5) {
-      alert("You cannot have more than 5 accounts.");
+    // Validate pin and confirm pin match
+    if (pin !== confirmpin) {
+      alert("Pins do not match");
+      console.log("pin", pin, "confirmpin", confirmpin);
       return;
     }
 
-    // Add new account
-    user.accounts.push({ accountNumber: accnumber });
-
-    // Update the user in the users array
-    const updatedUsers = localUsers.map(u => u.idcard === user.idcard ? user : u);
-    users.set(updatedUsers);
-
-    // Update the currentUser store
-    currentUser.set(user);
-
-    alert("Account added successfully");
-
-    // Redirect to the account page
-    navigate('/mainaccount');
+    axios.post("http://127.0.0.1:4000/esb/accounts/create", {
+      type: event.target.acctype.value,
+      pin: pin,
+    },
+    {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "application/json",
+        esb_token: `Bearer ${token}`,
+      }
+    }
+  )
+    .then((response) => {
+      console.log(response);
+      alert("Account registered successfully");
+      navigate("/mainaccount");
+    })
+    .catch((error) => {
+      console.error(error);
+      alert("Failed to register account");
+    });
   }
 </script>
 
 <Card class="w-full max-w-lg mx-auto">
-  <form class="flex flex-col space-y-6" on:submit={addNewAccount}>
+  <form class="flex flex-col space-y-6" on:submit={registerAccount}>
     <Label class="space-y-2">
       <div class="text-xs text-black mb-2 mr-4 w-full">
         Type
@@ -64,11 +91,11 @@
     </Label>
     <Label class="space-y-2">
       <span class="text-gray-400">Set a 6 digit pin</span>
-      <Input type="password" name="pin" required />
+      <Input type="password" name="pin" bind:value={pin} required />
     </Label>
     <Label class="space-y-2">
       <span class="text-gray-400">Confirm Pin</span>
-      <Input type="password" name="confirmpin" required />
+      <Input type="password" name="confirmpin" bind:value={confirmpin} required />
     </Label>
     <Button type="submit" class="w-full bg-green-400 hover:bg-green-500">Register</Button>
   </form>

@@ -1,25 +1,32 @@
 <script>
-  import { Card,Input, Label, Modal, Button, Dropdown, DropdownItem } from 'flowbite-svelte';
-  import { Link, navigate } from 'svelte-routing';
-  import { DotsVerticalOutline } from 'flowbite-svelte-icons';
-  import { currentUser, users } from '../lib/userstore.js';
-  import { onMount } from 'svelte';
-  import HoneyLemonLogo from '../assets/BankLogo.png';
-  import Transfer from '../assets/Transfer.png';
-  import Payment from '../assets/Pay.png';
-  import Loan from '../assets/Loan.png';
-  import Investment from '../assets/Invest.png';
-  import Statement from '../assets/Statement.png';
+  import {
+    Card,
+    Input,
+    Label,
+    Modal,
+    Button,
+    Dropdown,
+    DropdownItem,
+  } from "flowbite-svelte";
+  import { Link, navigate } from "svelte-routing";
+  import { DotsVerticalOutline } from "flowbite-svelte-icons";
+  import { currentUser, users } from "../lib/userstore.js";
+  import { onMount } from "svelte";
+  import HoneyLemonLogo from "../assets/BankLogo.png";
+  import Transfer from "../assets/Transfer.png";
+  import Payment from "../assets/Pay.png";
+  import Loan from "../assets/Loan.png";
+  import Investment from "../assets/Invest.png";
+  import Statement from "../assets/Statement.png";
   import axios from "axios";
 
   let user = null;
-  let enteredPin = '';
-  let pinError = '';
+  let enteredPin = "";
   let userData = null;
   let accountData = null;
   let selectedAccount = null;
   let loggedIn = false; // Default state for logged in status
-  let receiverAccountNumber = '';
+  let receiverAccountNumber = "";
   let amount = 0;
 
   function checkLoginStatus() {
@@ -42,7 +49,7 @@
       user = value;
     });
 
-    const token = getCookie('esb_token');
+    const token = getCookie("esb_token");
     if (token) {
       fetchData(token);
     }
@@ -51,7 +58,7 @@
   function getCookie(name) {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
+    if (parts.length === 2) return parts.pop().split(";").shift();
   }
 
   async function fetchData(token) {
@@ -59,32 +66,41 @@
       // Set the token as a cookie
       document.cookie = `esb_token=${token}; path=/;`;
 
-      const accResponse = await axios.get('http://127.0.0.1:4000/esb/accounts/clientAcc', {
-        withCredentials: true, // Ensure credentials are sent with the request
-        headers: {
-          'esb_token': `Bearer ${token}`
+      const accResponse = await axios.get(
+        "http://127.0.0.1:4000/esb/accounts/clientAcc",
+        {
+          withCredentials: true, // Ensure credentials are sent with the request
+          headers: {
+            esb_token: `Bearer ${token}`,
+          },
         }
-      });
+      );
 
-      const userResponse = await axios.get('http://127.0.0.1:4000/esb/clients/info', {
-        withCredentials: true, // Ensure credentials are sent with the request
-        headers: {
-          'esb_token': `Bearer ${token}`
+      const userResponse = await axios.get(
+        "http://127.0.0.1:4000/esb/clients/info",
+        {
+          withCredentials: true, // Ensure credentials are sent with the request
+          headers: {
+            esb_token: `Bearer ${token}`,
+          },
         }
-      });
+      );
 
       accountData = accResponse.data;
 
       userData = userResponse.data;
 
       selectedAccount = accountData.length > 0 ? accountData[0] : null;
+      console.log("Selected account:", selectedAccount);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error("Error fetching data:", error);
     }
   }
 
   function switchAccount(accountNumber) {
-    selectedAccount = accountData.find((account) => account.id === accountNumber);
+    selectedAccount = accountData.find(
+      (account) => account.id === accountNumber
+    );
   }
 
   let popupModal_deleteacc = false;
@@ -93,21 +109,34 @@
     popupModal_deleteacc = true;
   }
 
-  function handleTransactionConfirm() {
-      const storedPin = user?.pin;
+  function handleDeleteAccConfirm(event) {
+    event.preventDefault(); // Prevent default form submission
 
-      console.log('Entered PIN:', enteredPin);
-      console.log('Stored PIN:', storedPin);
+    if (!enteredPin) {
+      alert("Please enter your PIN.");
+      return;
+    }
 
-      if (enteredPin === storedPin) {
-          console.log('PIN is correct, navigating to /transfer3');
-          navigate('/transfer3', { state: { receiverAccountNumber, amount } });
-      } else {
-          pinError = "Incorrect PIN. Please try again.";
-          console.log('PIN is incorrect');
-      }
-  }
+    axios
+      .delete("http://127.0.0.1:4000/esb/accounts/delete", {
+        withCredentials: true, // Ensure credentials are sent with the request
+        data: {
+          id: selectedAccount.id, // Pass the selected account ID
+          pin: enteredPin, // Pass the entered PIN
+        },
+      })
+      .then((response) => {
+        console.log("Account deleted successfully:", response.data);
+        alert("Account deleted successfully.");
+        location.reload(); // Reload the page to reflect the changes
+      })
+      .catch((error) => {
+        console.error("Error deleting account:", error);
+        alert("Failed to delete account. Please check your PIN.");
+      });
+  };
 </script>
+
 <div class="flex flex-col items-center">
   <Card class="bg-white mb-5" size="lg" padding="xl" style="width: 900px;">
     <div class="flex flex-col h-full">
@@ -132,7 +161,10 @@
           <DotsVerticalOutline
             class="dots-menu dark:text-white cursor-pointer mb-10"
           />
-          <Dropdown triggeredBy=".dots-menu" class="bg-slate-100 rounded shadow-lg">
+          <Dropdown
+            triggeredBy=".dots-menu"
+            class="bg-slate-100 rounded shadow-lg"
+          >
             {#if accountData && accountData.length > 0}
               {#each accountData as account}
                 <DropdownItem
@@ -176,30 +208,40 @@
         </div>
       </div>
       <div class="flex flex-1 items-center justify-between">
-      <div>
-        <Link to="/changepin">
-          <Button class="w-40 h-9 bg-[#cccccc] hover:bg-slate-100 text-black flex items-center justify-center space-x-2">Change pin</Button>
-        </Link>
-      </div>
-      <div>
-        <Button class="w-40 h-9 bg-red-400 hover:bg-red-700 text-black flex items-center justify-center space-x-2" on:click={handleDeleteAcc}>Delete Account</Button>
-      </div>
-      <Modal bind:open={popupModal_deleteacc} size="xs" autoclose={false}>
-        <form class="flex flex-col space-y-6" action="#">
-            <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Enter PIN to Confirm</h3>
+        <div>
+          <Link to="/changepin">
+            <Button
+              class="w-40 h-9 bg-[#cccccc] hover:bg-slate-100 text-black flex items-center justify-center space-x-2"
+              >Change pin</Button
+            >
+          </Link>
+        </div>
+        <div>
+          <Button
+            class="w-40 h-9 bg-red-400 hover:bg-red-700 text-black flex items-center justify-center space-x-2"
+            on:click={handleDeleteAcc}>Delete Account</Button
+          >
+        </div>
+        <Modal bind:open={popupModal_deleteacc} size="xs" autoclose={false}>
+          <form class="flex flex-col space-y-6" action="#">
+            <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">
+              Enter PIN to Confirm
+            </h3>
             <Label class="space-y-2">
               <span>Enter your PIN</span>
               <Input type="password" bind:value={enteredPin} required />
             </Label>
-            {#if pinError}
-                <p class="text-red-500">{pinError}</p>
-            {/if}
             <div class="flex justify-center gap-4">
-                <Button color="red" on:click={handleTransactionConfirm}>Enter</Button>
-                <Button color="alternative" on:click={() => (popupModal_deleteacc = false)}>Cancel</Button>
+              <Button color="red" on:click={handleDeleteAccConfirm}
+                >Enter</Button
+              >
+              <Button
+                color="alternative"
+                on:click={() => (popupModal_deleteacc = false)}>Cancel</Button
+              >
             </div>
-        </form>
-    </Modal>
+          </form>
+        </Modal>
       </div>
     </div>
   </Card>

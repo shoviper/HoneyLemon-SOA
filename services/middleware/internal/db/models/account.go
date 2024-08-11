@@ -24,3 +24,14 @@ type AccountBalance struct {
 	Balance float64 `json:"balance"`
 	Type	string  `json:"type"`
 }
+
+type ChangePin struct {
+	ID      string `json:"id"`
+	OldPin  string `json:"oldPin"`
+	NewPin  string `json:"newPin"`
+}
+
+type DeleteAccount struct {
+	ID string `json:"id"`
+	Pin string `json:"pin"`
+}
