@@ -30,23 +30,6 @@
     <div class="ml-1 mr-5">
       <img src={HoneyLemonLogo} class="h-9" alt="HoneyLemonLogo" />
     </div>
-    <div class="flex space-x-5">
-      <a href="/transfer" class="text-black hover:text-green-500 no-underline"
-        >Transfer</a
-      >
-      <a href="/payment" class="text-black hover:text-green-500 no-underline"
-        >Payment</a
-      >
-      <a href="/loan" class="text-black hover:text-green-500 no-underline"
-        >Personal loans</a
-      >
-      <a href="/invest" class="text-black hover:text-green-500 no-underline"
-        >Investment</a
-      >
-      <a href="/statement" class="text-black hover:text-green-500 no-underline"
-        >Statement</a
-      >
-    </div>
   </div>
   <div class="flex space-x-3 items-center">
     <Link to="/login">
