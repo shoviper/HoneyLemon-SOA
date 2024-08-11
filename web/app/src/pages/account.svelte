@@ -46,7 +46,6 @@
     const token = getCookie('esb_token');
     if (token) {
       fetchData(token);
-      console.log('token:', token);
     }
   });
 

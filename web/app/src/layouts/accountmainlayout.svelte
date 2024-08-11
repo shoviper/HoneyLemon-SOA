@@ -10,13 +10,43 @@
   import axios from 'axios';
 
   let popupModal = false;
-
+  let userData = null;
   let user = null;
 
   // Subscribe to the currentUser store
   currentUser.subscribe(value => {
     user = value;
+
+  const token = getCookie('esb_token');
+  if (token) {
+    fetchData(token);
+    }
   });
+
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  }
+  
+  async function fetchData(token) {
+    try {
+      // Set the token as a cookie
+      document.cookie = `esb_token=${token}; path=/;`;
+
+      const userResponse = await axios.get('http://127.0.0.1:4000/esb/clients/info', {
+        withCredentials: true, // Ensure credentials are sent with the request
+        headers: {
+          'esb_token': `Bearer ${token}`
+        }
+      });
+
+      userData = userResponse.data;
+
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  }
 
   async function handleLogout() {
     try {
@@ -50,7 +80,7 @@
     <Avatar class="acs mr-12" src="{AccountLogo}" />
     <Dropdown class="bg-[#F0F0F0] rounded shadow-lg" triggeredBy=".acs">
       <DropdownHeader class="bg-[#28A745] p-4 rounded-t-lg">
-        <span class="block text-sm text-white dark:text-white">{user ? user.fullname : 'Guest'}</span>
+        <span class="block text-sm text-white dark:text-white">{userData ? userData.name : "User"}</span>
       </DropdownHeader>
       <DropdownDivider class="my-2 border-t border-gray-300" />
       <DropdownItem class="bg-white hover:bg-slate-50 px-4 py-2 text-gray-700">
