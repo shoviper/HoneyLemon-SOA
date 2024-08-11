@@ -73,10 +73,13 @@
 <div class="navbar bg-[#F0F0F0] h-24 flex items-center justify-between px-5 fixed top-0 left-0 right-0 shadow-lg z-50">
   <div class="flex flex-row items-center">
     <div class="ml-1">
-      <img src="{HoneyLemonLogo}" class="Logo" alt="HoneyLemonLogo" />
+      <Link to="/">
+        <img src={HoneyLemonLogo} alt="HoneyLemon Logo" class="Logo" />
+      </Link>
     </div>
   </div>
   <div>
+    <!-- mount to /mainaccou -->
     <Avatar class="acs mr-12" src="{AccountLogo}" />
     <Dropdown class="bg-[#F0F0F0] rounded shadow-lg" triggeredBy=".acs">
       <DropdownHeader class="bg-[#28A745] p-4 rounded-t-lg">

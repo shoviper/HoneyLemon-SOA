@@ -12,15 +12,15 @@
   import Statement from '../assets/Statement.png';
   import axios from "axios";
 
-
   let user = null;
-  let localUsers = [];
   let enteredPin = '';
   let pinError = '';
   let userData = null;
   let accountData = null;
   let selectedAccount = null;
   let loggedIn = false; // Default state for logged in status
+  let receiverAccountNumber = '';
+  let amount = 0;
 
   function checkLoginStatus() {
     // Check for the presence of a specific cookie
@@ -37,10 +37,6 @@
     if (!loggedIn) {
       navigate("/");
     }
-
-    users.subscribe((value) => {
-      localUsers = value;
-    });
 
     currentUser.subscribe((value) => {
       user = value;
@@ -78,24 +74,10 @@
       });
 
       accountData = accResponse.data;
-      if (accountData == null) {
-        console.log('accountData:', accountData);
-      }
 
       userData = userResponse.data;
-      // console.log('userData:', userData);
 
       selectedAccount = accountData.length > 0 ? accountData[0] : null;
-      // console.log('selectedAccount:', selectedAccount);
-      // Update user accounts with the fetched data
-      // user = {
-      //   thisuser: userData,
-      //   accounts: accountData,
-      //   selectedAccount: accountData.length > 0 ? accountData[0].id : null
-      // };
-
-
-      // currentUser.set(user);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -202,7 +184,7 @@
       <div>
         <Button class="w-40 h-9 bg-red-400 hover:bg-red-700 text-black flex items-center justify-center space-x-2" on:click={handleDeleteAcc}>Delete Account</Button>
       </div>
-      <Modal bind:open={popupModal_deleteacc} size="xs" autoclose noCloseButton>
+      <Modal bind:open={popupModal_deleteacc} size="xs" autoclose={false}>
         <form class="flex flex-col space-y-6" action="#">
             <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Enter PIN to Confirm</h3>
             <Label class="space-y-2">
