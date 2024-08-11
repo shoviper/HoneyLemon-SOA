@@ -1,60 +1,68 @@
 <script>
   import { Card, Button, Label, Input } from 'flowbite-svelte';
   import HoneyLemonLogo from '../assets/BankLogo.png';
-  import { currentUser, users } from '../lib/userstore.js';
   import { navigate } from 'svelte-routing';
-  
-  let user = null;
-  let localUsers = [];
+  import { onMount } from 'svelte';
+  import axios from 'axios';
+ 
+  let loggedIn = false;
 
-  // Subscribe to the current user and users store
-  currentUser.subscribe(value => {
-    user = value;
-  });
+  let accountId = null;
 
-  users.subscribe(value => {
-    localUsers = value;
+  let pin = "";
+  let newpin = "";
+  let confirmnewpin = "";
+
+  function checkLoginStatus() {
+    // Check for the presence of a specific cookie
+    const cookies = document.cookie.split(";").map((cookie) => cookie.trim());
+    const authCookie = cookies.find((cookie) =>
+      cookie.startsWith("esb_token=")
+    );
+
+    loggedIn = !!authCookie;
+  }
+
+  onMount(() => {
+    checkLoginStatus();
+    if (!loggedIn) {
+      navigate("/");
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    accountId = params.get("accountId");
+    console.log("Account ID:", accountId);
   });
 
   function changePin(event) {
     event.preventDefault();
 
-    const password = event.target.password.value;
-    const newPin = event.target.newpin.value;
-    const confirmNewPin = event.target.confirmnewpin.value;
-
-    // Check if password matches
-    if (password !== user.password) {
-      alert("Incorrect password");
+    if (newpin.length != 6) {
+      alert("Pin must be 6 digits");
       return;
     }
 
-    // Check if new PIN matches current PIN
-    if (newPin === user.pin) {
-      alert("New PIN cannot be the same as the current PIN");
+    if (newpin !== confirmnewpin) {
+      alert("Pins do not match");
       return;
     }
 
-    // Check if new PIN and confirm new PIN match
-    if (newPin !== confirmNewPin) {
-      alert("New PINs do not match");
-      return;
-    }
-
-    // Update the user's PIN
-    user.pin = newPin;
-
-    // Update the users store
-    const updatedUsers = localUsers.map(u => u.idcard === user.idcard ? user : u);
-    users.set(updatedUsers);
-
-    // Update the currentUser store
-    currentUser.set(user);
-
-    alert("PIN changed successfully");
-
-    // Navigate to the main account page or wherever appropriate
-    navigate('/mainaccount');
+    axios.patch(`http://127.0.0.1:4000/esb/accounts/update`, {
+      id: accountId,
+      oldPin: pin,
+      newPin: newpin,
+    }, {
+      withCredentials: true,
+    })
+    .then((response) => {
+      console.log(response);
+      alert("Pin changed successfully");
+      navigate("/mainaccount");
+    })
+    .catch((error) => {
+      console.error(error);
+      alert("Failed to change pin");
+    });
   }
 </script>
 
@@ -65,16 +73,20 @@
       <img src="{HoneyLemonLogo}" class="h-18 w-28" alt="HoneyLemonLogo" />
     </div>
     <Label class="space-y-2">
-      <span class="text-gray-400">Enter your current password</span>
-      <Input type="password" name="password" placeholder="Current password" required />
+      <span class="text-gray-400">Your Selected Account</span>
+      <Input type="text" name="selectedaccount" value="{accountId}" readonly />
+    </Label>
+    <Label class="space-y-2">
+      <span class="text-gray-400">Enter your Old Pin</span>
+      <Input type="password" name="oldpin" placeholder="Old PIN" bind:value={pin} binkrequired />
     </Label>
     <Label class="space-y-2">
       <span class="text-gray-400">Set a new 6 digit pin</span>
-      <Input type="password" name="newpin" placeholder="New PIN" required />
+      <Input type="password" name="newpin" placeholder="New PIN" bind:value={newpin} required />
     </Label>
     <Label class="space-y-2">
       <span class="text-gray-400">Confirm new pin</span>
-      <Input type="password" name="confirmnewpin" placeholder="Confirm new PIN" required />
+      <Input type="password" name="confirmnewpin" placeholder="Confirm new PIN" bind:value={confirmnewpin} required />
     </Label>
     <Button type="submit" class="w-full bg-green-400 hover:bg-green-500">Save Changes</Button>
   </form>

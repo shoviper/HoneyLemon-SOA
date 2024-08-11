@@ -10,7 +10,7 @@
   } from "flowbite-svelte";
   import { Link, navigate } from "svelte-routing";
   import { DotsVerticalOutline } from "flowbite-svelte-icons";
-  import { currentUser, users } from "../lib/userstore.js";
+  import { currentUser } from "../lib/userstore.js";
   import { onMount } from "svelte";
   import HoneyLemonLogo from "../assets/BankLogo.png";
   import Transfer from "../assets/Transfer.png";
@@ -38,6 +38,10 @@
 
     loggedIn = !!authCookie;
   }
+
+  function goToChangePin() {
+  navigate(`/changepin?accountId=${selectedAccount.id}`);
+}
 
   onMount(() => {
     checkLoginStatus();
@@ -134,7 +138,7 @@
         console.error("Error deleting account:", error);
         alert("Failed to delete account. Please check your PIN.");
       });
-  };
+  }
 </script>
 
 <div class="flex flex-col items-center">
@@ -209,12 +213,12 @@
       </div>
       <div class="flex flex-1 items-center justify-between">
         <div>
-          <Link to="/changepin">
-            <Button
-              class="w-40 h-9 bg-[#cccccc] hover:bg-slate-100 text-black flex items-center justify-center space-x-2"
-              >Change pin</Button
-            >
-          </Link>
+          <Button
+            class="w-40 h-9 bg-[#cccccc] hover:bg-slate-100 text-black flex items-center justify-center space-x-2"
+            on:click={goToChangePin}
+          >
+            Change pin
+          </Button>
         </div>
         <div>
           <Button
