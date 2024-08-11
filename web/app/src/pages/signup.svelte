@@ -3,23 +3,42 @@
   import { navigate } from 'svelte-routing';
   import { Card, Button, Label, Input } from 'flowbite-svelte';
   import HoneyLemonLogo from '../assets/BankLogo.png';
+  import { onMount } from "svelte";
+  import axios from 'axios';
 
+  let loggedIn = false; // Default state for logged in status
+
+  function checkLoginStatus() {
+    // Check for the presence of a specific cookie
+    const cookies = document.cookie.split(";").map((cookie) => cookie.trim());
+    const authCookie = cookies.find((cookie) =>
+      cookie.startsWith("esb_token=")
+    );
+
+    loggedIn = !!authCookie;
+  }
+
+  onMount(() => {
+    checkLoginStatus();
+    if (loggedIn) {
+      navigate("/mainaccount");
+    }
+  });
   let localUsers = [];
 
   users.subscribe(value => {
     localUsers = value;
   });
 
-  function signup(event) {
-    event.preventDefault();
+  let idcard = "";
+  let fullname = "";
+  let birthdate = "";
+  let address = "";
+  let password = "";
+  let confirmpassword = "";
 
-    const idcard = event.target.idcard.value;
-    const fullname = event.target.fullname.value;
-    const birthdate = event.target.birthdate.value;
-    const address = event.target.address.value;
-    const email = event.target.email.value;
-    const password = event.target.password.value;
-    const confirmpassword = event.target.confirmpassword.value;
+  async function signup(event) {
+    event.preventDefault();
 
     // Validate ID card length
     if (idcard.length != 13) {
@@ -39,28 +58,32 @@
       return;
     }
 
-    // Add new user
-    const newUser = {
-      idcard,
-      fullname,
-      birthdate,
-      address,
-      email,
-      password,
-      accounts: [] // Initialize with an empty accounts array
-    };
-    localUsers.push(newUser);
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:4000/esb/register", // Corrected URL
+        {
+          id: idcard,
+          name: fullname,
+          address: address,
+          birthDate: birthdate,
+          password: password,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
 
-    // Update the users store
-    users.set(localUsers);
-
-    // Set the currentUser store
-    currentUser.set(newUser);
-
-    alert("Sign up successful");
-
-    // Navigate to the appropriate page
-    navigate(newUser.accounts.length > 0 ? '/' : '/accountregister');
+      if (response.data) {
+        navigate("/login");
+      } else {
+        alert("Signup failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error during signup:", error);
+      alert("An error occurred during signup. Please try again later.");
+    }
   }
 </script>
 
@@ -69,31 +92,31 @@
     <!-- Form fields -->
     <Label class="space-y-2">
       <span class="text-gray-400">Idcard</span>
-      <Input type="text" name="idcard" required />
+      <Input type="text" name="idcard" bind:value={idcard} required />
     </Label>
     <Label class="space-y-2">
       <span class="text-gray-400">Full Name</span>
-      <Input type="text" name="fullname" required />
+      <Input type="text" name="fullname" bind:value={fullname} required />
     </Label>
     <Label class="space-y-2">
       <span class="text-gray-400">Birthdate</span>
-      <Input type="date" name="birthdate" required />
+      <Input type="date" name="birthdate" bind:value={birthdate} required />
     </Label>
     <Label class="space-y-2">
       <span class="text-gray-400">Address</span>
-      <Input type="text" name="address" required />
+      <Input type="text" name="address" bind:value={address} required />
     </Label>
-    <Label class="space-y-2">
+    <!-- <Label class="space-y-2">
       <span class="text-gray-400">Email</span>
       <Input type="email" name="email" required />
-    </Label>
+    </Label> -->
     <Label class="space-y-2">
       <span class="text-gray-400">Password</span>
-      <Input type="password" name="password" required />
+      <Input type="password" name="password" bind:value={password} required />
     </Label>
     <Label class="space-y-2">
       <span class="text-gray-400">Confirm password</span>
-      <Input type="password" name="confirmpassword" required />
+      <Input type="password" name="confirmpassword" bind:value={confirmpassword} required />
     </Label>
     <Button type="submit" class="w-full bg-[#28A745] hover:bg-[#28A745] hover:opacity-70">Signup</Button>
     <div class="text-sm font-medium text-gray-500 dark:text-gray-300">

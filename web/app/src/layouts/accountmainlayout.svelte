@@ -7,20 +7,66 @@
   import AccountLogo from "../assets/AccountLogo.png";
   import { Button, Dropdown, DropdownItem, Avatar, DropdownHeader, DropdownDivider } from 'flowbite-svelte';
   import { BellSolid, EyeSolid } from 'flowbite-svelte-icons';
+  import axios from 'axios';
 
   let popupModal = false;
-
+  let userData = null;
   let user = null;
 
   // Subscribe to the currentUser store
   currentUser.subscribe(value => {
     user = value;
+
+  const token = getCookie('esb_token');
+  if (token) {
+    fetchData(token);
+    }
   });
 
-  function handleLogout() {
-    currentUser.set(null);
-    localStorage.removeItem('currentUser'); // Clear user from localStorage
-    navigate('/'); // Redirect to login page
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  }
+  
+  async function fetchData(token) {
+    try {
+      // Set the token as a cookie
+      document.cookie = `esb_token=${token}; path=/;`;
+
+      const userResponse = await axios.get('http://127.0.0.1:4000/esb/clients/info', {
+        withCredentials: true, // Ensure credentials are sent with the request
+        headers: {
+          'esb_token': `Bearer ${token}`
+        }
+      });
+
+      userData = userResponse.data;
+
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  }
+
+  async function handleLogout() {
+    try {
+      const response = await axios.get("http://localhost:4000/esb/logout", {
+        withCredentials: true, // Include cookies with the request
+      });
+
+      // Clear the token cookie
+      document.cookie =
+        "esb_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+
+      if (response.status === 200) {
+        console.log("Logout successful:", response.data);
+        navigate("/");
+      } else {
+        console.error("Logout failed:", response.status);
+      }
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   }
 </script>
 
@@ -34,7 +80,7 @@
     <Avatar class="acs mr-12" src="{AccountLogo}" />
     <Dropdown class="bg-[#F0F0F0] rounded shadow-lg" triggeredBy=".acs">
       <DropdownHeader class="bg-[#28A745] p-4 rounded-t-lg">
-        <span class="block text-sm text-white dark:text-white">{user ? user.fullname : 'Guest'}</span>
+        <span class="block text-sm text-white dark:text-white">{userData ? userData.name : "User"}</span>
       </DropdownHeader>
       <DropdownDivider class="my-2 border-t border-gray-300" />
       <DropdownItem class="bg-white hover:bg-slate-50 px-4 py-2 text-gray-700">
@@ -59,7 +105,7 @@
           Sign out
         </div>
       </DropdownItem>
-      <Modal bind:open={popupModal} size="xs" autoclose noCloseButton>
+      <Modal bind:open={popupModal} size="xs" autoclose>
         <div class="text-center">
           <ExclamationCircleOutline class="mx-auto mb-4 text-gray-400 w-12 h-12" />
           <h3 class="mb-5 text-lg font-normal text-gray-500">Are you sure you want to sign out?</h3>
