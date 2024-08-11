@@ -75,7 +75,9 @@
       });
 
       accountData = accResponse.data;
-      // console.log('accountData:', accountData);
+      if (accountData == null) {
+        console.log('accountData:', accountData);
+      }
 
       userData = userResponse.data;
       // console.log('userData:', userData);
@@ -106,9 +108,8 @@
       <div class="flex items-center justify-between mb-4">
         <div class="flex flex-col">
           <h5
-            class="text-[#004D00] mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+            class="text-[#004D00] mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white"
           >
-            <!-- get name from localstorage -->
             {#if userData}
               {userData.name}
             {/if}
@@ -125,18 +126,22 @@
           <DotsVerticalOutline
             class="dots-menu dark:text-white cursor-pointer mb-10"
           />
-          <Dropdown
-            triggeredBy=".dots-menu"
-            class="bg-slate-100 rounded shadow-lg"
-          >
-            {#each accountData as account}
-              <DropdownItem
-                class="bg-white hover:bg-slate-50"
-                on:click={() => switchAccount(account.id)}
-              >
-                {account.id}
+          <Dropdown triggeredBy=".dots-menu" class="bg-slate-100 rounded shadow-lg">
+            {#if accountData && accountData.length > 0}
+              {#each accountData as account}
+                <DropdownItem
+                  class="bg-white hover:bg-slate-50 text-gray-700"
+                  on:click={() => switchAccount(account.id)}
+                >
+                  {account.id}
+                </DropdownItem>
+              {/each}
+            {:else}
+              <!-- No accounts, show only "Add new account" -->
+              <DropdownItem class="text-gray-500">
+                No accounts available
               </DropdownItem>
-            {/each}
+            {/if}
             <DropdownItem slot="footer" class="bg-[#28A745] hover:bg-[#03C04A]">
               <Link
                 to="/addaccount"

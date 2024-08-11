@@ -14,7 +14,10 @@ import (
 )
 
 func CheckRegisterClient(ctx *fiber.Ctx) error {
+	fmt.Println("Register client")
 	requestBody := ctx.Body()
+
+	// fmt.Println(string(requestBody))
 
 	//check if the request body is empty
 	if len(requestBody) == 0 {
@@ -29,6 +32,8 @@ func CheckRegisterClient(ctx *fiber.Ctx) error {
 	//check input fields
 	var client models.RegisterClient
 	err := json.Unmarshal(requestBody, &client)
+
+	fmt.Println(bytes.NewBuffer(requestBody))
 	if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).SendString("Failed to unmarshal request body")
 	}
