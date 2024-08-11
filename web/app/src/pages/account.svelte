@@ -138,7 +138,7 @@
               {/each}
             {:else}
               <!-- No accounts, show only "Add new account" -->
-              <DropdownItem class="text-gray-500">
+              <DropdownItem class="bg-white text-gray-500">
                 No accounts available
               </DropdownItem>
             {/if}
