@@ -19,3 +19,5 @@
 !services/api/statement/statement-service.yaml
 !services/middleware/esb-deployment.yaml
 !services/middleware/esb-service.yaml
+!web/app/svelte-app-deployment.yaml
+!web/app/svelte-app-service.yaml
