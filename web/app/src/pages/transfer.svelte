@@ -53,6 +53,11 @@
 
   function handleNextClick() {
     if (!receiverAccountNumber || !amount) {
+      // check amount the number after the decimal point is not more than 2
+      if (amount.split(".")[1] && amount.split(".")[1].length > 2) {
+        alert("Please enter a valid amount.");
+        return;
+      }
       alert("Please fill in the information.");
     } else {
       navigate("/transfer2", {
