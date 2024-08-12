@@ -63,7 +63,6 @@
         }
       );
 
-      const accountData = accResponse.data;
       userFullName = userResponse.data.name;
       //   const selectedAccount = accountData.length > 0 ? accountData[0] : null;
     } catch (error) {
