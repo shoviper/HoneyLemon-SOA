@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: esb-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: esb
+  template:
+    metadata:
+      labels:
+        app: esb
+    spec:
+      containers:
+      - name: esb-container
+        image: middleware/services:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 4000
