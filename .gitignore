@@ -1,3 +1,17 @@
 *.yaml
 *.sum
 *.DS_Store
+
+`except file`
+!services/api/transaction/transaction-deployment.yaml 
+!services/api/transaction/transaction-service.yaml
+!services/api/account/account-deployment.yaml
+!services/api/account/account-service.yaml
+!services/api/client/client-deployment.yaml
+!services/api/client/client-service.yaml
+!services/api/payment/payment-deployment.yaml
+!services/api/payment/payment-service.yaml
+!services/api/statement/statement-deployment.yaml
+!services/api/statement/statement-service.yaml
+!services/middleware/esb-deployment.yaml
+!services/middleware/esb-service.yaml
