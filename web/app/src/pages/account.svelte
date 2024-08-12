@@ -10,7 +10,7 @@
   } from "flowbite-svelte";
   import { Link, navigate } from "svelte-routing";
   import { DotsVerticalOutline } from "flowbite-svelte-icons";
-  import { currentUser, users, currentAccount } from "../lib/userstore.js";
+  import { currentAccount } from "../lib/userstore.js";
   import { onMount } from "svelte";
   import HoneyLemonLogo from "../assets/BankLogo.png";
   import Transfer from "../assets/Transfer.png";
@@ -51,10 +51,6 @@
     if (!loggedIn) {
       navigate("/");
     }
-
-    currentUser.subscribe((value) => {
-      user = value;
-    });
 
     const token = getCookie("esb_token");
     if (token) {
@@ -99,8 +95,15 @@
       userData = userResponse.data;
       // console.log('userData:', userData);
 
-      selectedAccount = accountData.length > 0 ? accountData[0] : null;
+      if (accountData.length > 0){
+        selectedAccount = accountData[0]
+        currentAccount.set(accountData[0].id)
+      } else {
+        selectedAccount = null
+        currentAccount.set(null)
+      }
       console.log("Selected account:", selectedAccount);
+      
     } catch (error) {
       console.error("Error fetching data:", error);
     }
