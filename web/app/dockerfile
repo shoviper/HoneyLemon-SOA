@@ -1,0 +1,30 @@
+# Use an official Node.js runtime as a parent image
+FROM node:20 AS build
+
+# Set the working directory
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy the rest of the application code
+COPY . .
+
+# Build the Svelte application
+RUN npm run build
+
+# Use a lightweight web server image to serve the built files
+FROM nginx:alpine
+
+# Copy the build output from the previous stage to the Nginx directory
+COPY --from=build /app/public /usr/share/nginx/html
+
+# Expose port 5000 (instead of the default 80 for Nginx)
+EXPOSE 5000
+
+# Update the Nginx configuration to use port 5000
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Start Nginx server
+CMD ["nginx", "-g", "daemon off;"]
