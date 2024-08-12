@@ -24,6 +24,7 @@ func ESBRoute(app *fiber.App) {
 		client := esb.Group("/clients")
 		{
 			client.Get("/info", GetClientInfo)
+			client.Get("/:id", GetClientByID)
 		}
 
 		account := esb.Group("/accounts")

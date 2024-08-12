@@ -28,6 +28,7 @@ func SetupClientRoute(app *fiber.App, db *gorm.DB, vp *viper.Viper) {
 				client.Post("/login", cs.LoginClient)
 				client.Delete("/", cs.DeleteClient)
 				client.Get("/logout", cs.LogoutClient)
+				client.Get("/:id", cs.GetClientByID)
 			}
 
 			authClient := v1.Group("/authclients")

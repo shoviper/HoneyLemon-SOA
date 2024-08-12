@@ -3,7 +3,7 @@
   import { navigate } from "svelte-routing";
 
   // Get data from location state
-  const { transaction, userFullName } = history.state || {};
+  const { transaction, senderName, receiverName } = history.state || {};
 
   let tx = transaction.transaction
   // Function to format date to the desired format
@@ -32,7 +32,7 @@
         <span class="text-black text-xl">From:</span>
       </Label>
       <Label class="space-y-2 flex flex-col mt-8">
-        <span class="text-xl text-[#28A745]">{userFullName}</span>
+        <span class="text-xl text-[#28A745]">{senderName}</span>
         <span class="text-base text-[#666666]">{tx.SenderID}</span>
       </Label>
     </div>
@@ -41,6 +41,7 @@
         <span class="text-black text-xl">To:</span>
       </Label>
       <Label class="space-y-2 flex flex-col">
+        <span class="text-xl text-[#28A745]">{receiverName}</span>
         <span class="text-base text-[#666666]">{tx.ReceiverID}</span>
       </Label>
     </div>

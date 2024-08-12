@@ -178,6 +178,41 @@ func DoLogout(ctx *fiber.Ctx) error {
 	return ctx.Status(res.StatusCode).SendString(string(body))
 }
 
+func GetClientByID(ctx *fiber.Ctx) error {
+	clientID := ctx.Params("id")
+	cookie := ctx.Cookies("esb_token")
+
+	// Ensure the clientID is provided
+	if clientID == "" {
+		return ctx.Status(fiber.StatusBadRequest).SendString("clientID is required")
+	}
+
+	// Create a request to the client service
+	req, err := http.NewRequest("GET", "http://client-services:3001/api/v1/clients/"+clientID, nil)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to create request to client service: " + err.Error())
+	}
+
+	// Set the necessary headers
+	req.Header.Set("Cookie", "esb_token="+cookie)
+
+	// Perform the request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to make request to client service: " + err.Error())
+	}
+	defer resp.Body.Close()
+
+	// Read and return the response from the client service
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString("Failed to read response from client service: " + err.Error())
+	}
+
+	return ctx.Status(resp.StatusCode).SendString(string(body))
+}
+
 func GetAllAccounts(ctx *fiber.Ctx) error {
 	//set header from cookie
 	cookie := ctx.Cookies("esb_token")

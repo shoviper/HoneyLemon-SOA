@@ -22,7 +22,9 @@
 
   // Fetch currentUser from the store
   let user;
-  let userFullName;
+  let senderName;
+  let receiverName;
+
   currentUser.subscribe((value) => {
     user = value;
   });
@@ -63,7 +65,28 @@
         }
       );
 
-      userFullName = userResponse.data.name;
+      senderName = userResponse.data.name;
+
+      const receiverAccount = await axios.get(
+        "http://127.0.0.1:4000/esb/accounts/account/" + receiverAccountNumber,
+        {
+          withCredentials: true, // Ensure credentials are sent with the request
+          headers: {
+            esb_token: `Bearer ${token}`,
+          },
+        }
+      );
+      
+      const receiverAccountName = await axios.get(
+        "http://127.0.0.1:4000/esb/clients/" + receiverAccount.data.clientID,
+        {
+          withCredentials: true, // Ensure credentials are sent with the request
+          headers: {
+            esb_token: `Bearer ${token}`,
+          },
+        }
+      );
+      receiverName = receiverAccountName.data.name;
       //   const selectedAccount = accountData.length > 0 ? accountData[0] : null;
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -130,7 +153,8 @@
             navigate("/transfer3", {
               state: {
                 transaction,
-                userFullName
+                senderName,
+                receiverName
               },
             });
           } else {
@@ -178,7 +202,7 @@
         <span class="text-black text-xl">From:</span>
       </Label>
       <Label class="space-y-2 flex flex-col mt-8">
-        <span class="text-xl text-[#28A745]">{userFullName}</span>
+        <span class="text-xl text-[#28A745]">{senderName}</span>
         <span class="text-base text-[#666666]">{fromAccountNumber}</span>
       </Label>
     </div>
@@ -187,8 +211,9 @@
         <span class="text-black text-xl">To:</span>
       </Label>
       <Label class="space-y-2 flex flex-col">
+        <span class="text-xl text-[#28A745]">{receiverName}</span>
         <span class="text-base text-[#666666]"
-          >{receiverAccountNumber || "N/A"}</span
+          >{receiverAccountNumber}</span
         >
       </Label>
     </div>

@@ -152,7 +152,7 @@ func (cs *ClientService) GetClientInfo(ctx *fiber.Ctx) error {
 	var clientDB entities.Client
 	if err := cs.clientDB.Where("id = ?", clientID).First(&clientDB).Error; err != nil {
 		return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error": err.Error(),
+			"error":   err.Error(),
 			"message": "Client not found",
 		})
 	}
@@ -215,4 +215,32 @@ func (cs *ClientService) LogoutClient(ctx *fiber.Ctx) error {
 	return ctx.Status(200).JSON(fiber.Map{
 		"message": "Logout successfully",
 	})
+}
+
+func (cs *ClientService) GetClientByID(ctx *fiber.Ctx) error {
+	// Define the response structure
+	type response struct {
+		ID   string `json:"id"`
+		Name string `json:"name"`
+	}
+
+	clientID := ctx.Params("id")
+
+	// Fetch the client information from the database
+	var clientInfo entities.Client
+	if err := cs.clientDB.Where("id = ?", clientID).First(&clientInfo).Error; err != nil {
+		return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error":   err.Error(),
+			"message": "Client not found",
+		})
+	}
+
+	// Format the response
+	clientDetails := response{
+		ID:   clientInfo.ID,
+		Name: clientInfo.Name,
+	}
+
+	// Return the response as JSON
+	return ctx.Status(200).JSON(clientDetails)
 }

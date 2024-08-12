@@ -36,6 +36,7 @@
     );
 
     loggedIn = !!authCookie;
+    console.log(authCookie);
   }
 
   function goToChangePin() {
