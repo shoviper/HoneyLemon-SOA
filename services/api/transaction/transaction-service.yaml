@@ -9,4 +9,4 @@ spec:
     - protocol: TCP
       port: 3003
       targetPort: 3003
-  type: NodePort
+  type: LoadBalancer
