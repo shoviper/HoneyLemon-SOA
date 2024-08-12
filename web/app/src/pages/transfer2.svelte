@@ -88,62 +88,77 @@
   }
 
   async function handleTransactionConfirm() {
-  try {
-    const verifyResponse = await axios.post(
-      "http://127.0.0.1:4000/esb/accounts/verifyPin",
-      {
-        accountID: fromAccountNumber,
-        pin: enteredPin,
-      },
-      {
-        withCredentials: true,
-        headers: {
-          esb_token: `Bearer ${token}`,
+    try {
+      const verifyResponse = await axios.post(
+        "http://127.0.0.1:4000/esb/accounts/verifyPin",
+        {
+          accountID: fromAccountNumber,
+          pin: enteredPin,
         },
-      }
-    );
-
-    // Check the response status for successful PIN verification
-    if (verifyResponse.status === 200) {
-      // PIN verified successfully, proceed with transaction creation
-      try {
-        const transactionResponse = await axios.post(
-          "http://127.0.0.1:4000/esb/transactions/create",
-          {
-            senderID: fromAccountNumber,
-            receiverID: receiverAccountNumber,
-            amount: parseFloat(amount),
+        {
+          withCredentials: true,
+          headers: {
+            esb_token: `Bearer ${token}`,
           },
-          {
-            withCredentials: true,
-            headers: {
-              esb_token: `Bearer ${token}`,
-            },
-          }
-        );
-
-        // Handle transaction response if needed
-        if (transactionResponse.status === 200) {
-          alert('Transaction successful!');
-          navigate("/")
-        } else {
-          alert('Transaction failed with status: ' + transactionResponse.status);
-          enteredPin = ""
         }
-      } catch (transactionError) {
-        alert('Error creating transaction: ' + (transactionError.response?.data?.message || transactionError.message));
-        enteredPin = ""
-      }
-    } else {
-      alert('PIN verification failed with status: ' + verifyResponse.status);
-      enteredPin = ""
-    }
-  } catch (verifyError) {
-    alert('Error verifying PIN: ' + (verifyError.response?.data?.message || verifyError.message));
-    enteredPin = ""
-  }
-}
+      );
 
+      // Check the response status for successful PIN verification
+      if (verifyResponse.status === 200) {
+        // PIN verified successfully, proceed with transaction creation
+        try {
+          const transactionResponse = await axios.post(
+            "http://127.0.0.1:4000/esb/transactions/create",
+            {
+              senderID: fromAccountNumber,
+              receiverID: receiverAccountNumber,
+              amount: parseFloat(amount),
+            },
+            {
+              withCredentials: true,
+              headers: {
+                esb_token: `Bearer ${token}`,
+              },
+            }
+          );
+
+          // Handle transaction response if needed
+          if (transactionResponse.status === 200) {
+            let transaction = transactionResponse.data
+            console.log(transaction);
+            
+            navigate("/transfer3", {
+              state: {
+                transaction,
+                userFullName
+              },
+            });
+          } else {
+            alert(
+              "Transaction failed with status: " + transactionResponse.status
+            );
+            enteredPin = "";
+          }
+        } catch (transactionError) {
+          alert(
+            "Error creating transaction: " +
+              (transactionError.response?.data?.message ||
+                transactionError.message)
+          );
+          enteredPin = "";
+        }
+      } else {
+        alert("PIN verification failed with status: " + verifyResponse.status);
+        enteredPin = "";
+      }
+    } catch (verifyError) {
+      alert(
+        "Error verifying PIN: " +
+          (verifyError.response?.data?.message || verifyError.message)
+      );
+      enteredPin = "";
+    }
+  }
 
   function handleTransactionCancel() {
     navigate("/mainaccount");
