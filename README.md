@@ -3,6 +3,6 @@ A service-oriented architecture for a virtual banking system using Svelte, Go, P
 
 Project's members
 
-Budthbundit Thaya-urai
-Inthat Sappipat
-Intutch Sribanyaranond
+1. Budthbundit Thaya-urai
+2. Inthat Sappipat
+3. Intutch Sribanyaranond
